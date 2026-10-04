@@ -1,0 +1,67 @@
+name: Export Kolkata data
+
+# Downloads the Kolkata walking network and amenities from OpenStreetMap and
+# commits them to data/kolkata/. Runs when the export settings change, or by hand
+# from the Actions tab ("Run workflow").
+on:
+  workflow_dispatch:
+    inputs:
+      radius:
+        description: "Metres from the centre to each side of the square"
+        default: "12000"
+      tile_km:
+        description: "Tile size in km"
+        default: "2.5"
+  push:
+    paths:
+      - export_city.py
+      - .github/workflows/export-kolkata.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: export-kolkata-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install osmnx
+
+      - name: Cache OpenStreetMap downloads
+        uses: actions/cache@v4
+        with:
+          path: cache
+          key: osm-kolkata-${{ inputs.radius || '12000' }}
+
+      - name: Export Kolkata
+        run: |
+          rm -rf data/kolkata
+          python export_city.py "Kolkata, West Bengal, India" kolkata \
+            --name "Kolkata" \
+            --center 22.55,88.36 \
+            --radius "${{ inputs.radius || '12000' }}" \
+            --tile-km "${{ inputs.tile_km || '2.5' }}"
+
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No changes to the data."
+          else
+            git commit -m "Update Kolkata data from OpenStreetMap"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
