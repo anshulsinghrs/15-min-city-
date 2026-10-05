@@ -1,5 +1,9 @@
 # 15 minutes. For whom? — Kolkata
 
+> **Made by Anshul Singh**  
+> *Indian Institute of Technology Kharagpur (IIT KGP)*  
+> GitHub: [@anshulsinghrs](https://github.com/anshulsinghrs)
+
 An interactive map of Kolkata that shows how far you can walk in a given time, and how that changes with walking speed and with avoiding stairs. The same 15 minutes reach very different places for different people.
 
 This is a Kolkata adaptation of [martincantcode/15-minutes](https://github.com/martincantcode/15-minutes) by Martin Bangratz (MIT licence).
