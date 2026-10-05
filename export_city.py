@@ -28,32 +28,76 @@ from pathlib import Path
 
 import numpy as np
 
-CATS = ["Groceries", "Health", "Education", "Parks & play", "Cafés & eating", "Benches", "Stations"]
-GROCERY = {"supermarket", "convenience", "greengrocer", "bakery", "butcher"}
-HEALTH = {"pharmacy", "doctors", "clinic", "hospital", "dentist"}
-EDUCATION = {"school", "kindergarten", "library"}
-PARKS = {"park", "playground", "garden"}
-EATING = {"cafe", "restaurant", "pub", "bar"}
+CATS = [
+    "Groceries & Essentials",   # 0
+    "Healthcare",               # 1
+    "Education",                # 2
+    "Parks & Recreation",       # 3
+    "Dining & Cafés",           # 4
+    "Rest Benches",             # 5
+    "Transit & Stations",       # 6
+    "Civic & Financial",        # 7
+    "Culture & Worship",        # 8
+    "Sanitation & Water"        # 9
+]
+GROCERY = {
+    "supermarket", "convenience", "greengrocer", "bakery", "butcher", "general",
+    "department_store", "dairy", "kiosk", "confectionery", "pastry", "seafood",
+    "deli", "variety_store", "market", "grocery", "spices", "tea", "coffee", "mall"
+}
+HEALTH = {"pharmacy", "doctors", "clinic", "hospital", "dentist", "veterinary", "nursing_home", "health_post"}
+HEALTH_SHOPS = {"chemist", "optician", "medical_supply"}
+EDUCATION = {
+    "school", "kindergarten", "library", "college", "university", "music_school",
+    "language_school", "tuition", "research_institute", "training"
+}
+PARKS = {
+    "park", "playground", "garden", "pitch", "sports_centre", "fitness_centre",
+    "swimming_pool", "stadium", "nature_reserve", "track", "recreation_ground"
+}
+EATING = {"cafe", "restaurant", "pub", "bar", "fast_food", "food_court", "ice_cream", "street_vendor"}
+CIVIC = {
+    "bank", "atm", "post_office", "police", "fire_station", "townhall", "courthouse",
+    "social_facility", "community_centre", "bureau_de_change"
+}
+CULTURE_AMENITIES = {"place_of_worship", "theatre", "cinema", "arts_centre"}
+CULTURE_TOURISMS = {"museum", "gallery", "attraction", "viewpoint"}
+CULTURE_HISTORIC = {"monument", "memorial", "heritage", "archaeological_site"}
+SANITATION = {"drinking_water", "toilets", "water_point"}
 WHEELCHAIR = {"yes": 1, "limited": 2, "no": 3}   # 0 = not tagged
 
 
 def categorize(tags):
     """Return (category index, wheelchair code) or None. `tags` is a plain dict of strings."""
-    if tags.get("railway") in ("station", "tram_stop"):
-        return 6, WHEELCHAIR.get(tags.get("wheelchair"), 0)
-    amenity, shop, leisure = tags.get("amenity"), tags.get("shop"), tags.get("leisure")
-    if amenity == "bench":
+    r = tags.get("railway")
+    a = tags.get("amenity")
+    h = tags.get("highway")
+    s = tags.get("shop")
+    l = tags.get("leisure")
+    t = tags.get("tourism")
+    hist = tags.get("historic")
+    wc = WHEELCHAIR.get(tags.get("wheelchair"), 0)
+
+    if r in ("station", "tram_stop", "subway_entrance", "halt") or a in ("ferry_terminal", "bus_station") or h == "bus_stop":
+        return 6, wc
+    if a == "bench":
         return 5, 0
-    if shop in GROCERY:
-        return 0, 0
-    if amenity in HEALTH:
-        return 1, 0
-    if amenity in EDUCATION:
-        return 2, 0
-    if leisure in PARKS:
-        return 3, 0
-    if amenity in EATING:
-        return 4, 0
+    if a == "marketplace" or s in GROCERY:
+        return 0, wc
+    if a in HEALTH or s in HEALTH_SHOPS:
+        return 1, wc
+    if a in EDUCATION:
+        return 2, wc
+    if l in PARKS or a == "gym":
+        return 3, wc
+    if a in EATING:
+        return 4, wc
+    if a in CIVIC:
+        return 7, wc
+    if a in CULTURE_AMENITIES or t in CULTURE_TOURISMS or hist in CULTURE_HISTORIC:
+        return 8, wc
+    if a in SANITATION:
+        return 9, wc
     return None
 
 
@@ -325,8 +369,15 @@ def main():
     ox.settings.useful_tags_way = sorted(set(ox.settings.useful_tags_way) | {"ramp:wheelchair"})
     out = Path("data") / args.slug
     out.mkdir(parents=True, exist_ok=True)
-    tags = {"shop": sorted(GROCERY), "amenity": sorted(HEALTH | EDUCATION | EATING | {"bench"}),
-            "leisure": sorted(PARKS), "railway": ["station", "tram_stop"]}
+    tags = {
+        "shop": sorted(GROCERY | HEALTH_SHOPS),
+        "amenity": sorted(HEALTH | EDUCATION | EATING | CIVIC | CULTURE_AMENITIES | SANITATION | {"bench", "marketplace", "ferry_terminal", "bus_station", "gym"}),
+        "leisure": sorted(PARKS),
+        "railway": ["station", "tram_stop", "subway_entrance", "halt"],
+        "tourism": sorted(CULTURE_TOURISMS),
+        "historic": sorted(CULTURE_HISTORIC),
+        "highway": ["bus_stop"]
+    }
 
     center = None
     print("Downloading the walking network ... (a busy server answers 504 and the script retries; that can take a while)")

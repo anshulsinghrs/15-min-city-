@@ -3,83 +3,1645 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>15 minutes. For whom? Kolkata</title>
+<title>15 minutes. For whom? — Kolkata Isochrone Explorer</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚶</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="vendor/maplibre-gl.css">
 <style>
-  :root { --ink:#15171a; --paper:#f7f4ec; --teal:#1f7a99; }
+  :root {
+    --bg-app: #f8fafc;
+    --panel-bg: rgba(255, 255, 255, 0.92);
+    --panel-border: rgba(226, 232, 240, 0.85);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --card-bg: rgba(248, 250, 252, 0.95);
+    --card-border: rgba(226, 232, 240, 0.9);
+    --accent: #0d9488;
+    --accent-light: #14b8a6;
+    --accent-dark: #0f766e;
+    --accent-glow: rgba(13, 148, 136, 0.22);
+    --track-bg: #e2e8f0;
+    --shadow-panel: 0 24px 48px -12px rgba(15, 23, 42, 0.14), 0 1px 3px rgba(15, 23, 42, 0.05);
+    --shadow-card: 0 2px 8px -2px rgba(15, 23, 42, 0.06);
+    --shadow-float: 0 14px 30px -6px rgba(15, 23, 42, 0.16);
+    --radius-xl: 22px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  }
+
+  body.dark-theme {
+    --bg-app: #090d16;
+    --panel-bg: rgba(15, 23, 42, 0.92);
+    --panel-border: rgba(51, 65, 85, 0.65);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-faint: #64748b;
+    --card-bg: rgba(30, 41, 59, 0.75);
+    --card-border: rgba(51, 65, 85, 0.65);
+    --accent: #2dd4bf;
+    --accent-light: #5eead4;
+    --accent-dark: #14b8a6;
+    --accent-glow: rgba(45, 212, 191, 0.25);
+    --track-bg: #334155;
+    --shadow-panel: 0 24px 60px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.07) inset;
+    --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+    --shadow-float: 0 16px 36px -6px rgba(0, 0, 0, 0.65);
+  }
+
   * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: var(--ink); }
-  body { display: flex; }
-  #panel { width: 360px; padding: 20px; background: var(--paper); overflow-y: auto; font-size: 14px; z-index: 2; }
-  h1 { font-weight: 800; font-size: 32px; line-height: 1; margin: 0 0 6px; }
-  h1 span { color: var(--teal); }
-  .ctl { margin: 14px 0; }
-  .ctl input[type=range] { width: 100%; }
-  .note { font-size: 12px; line-height: 1.4; color: #555; }
-  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-  td { padding: 3px 0; border-bottom: 1px solid #ddd; }
-  td:not(:first-child) { text-align: right; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
-  .keyline { display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
-  .dot.st { width: 12px; height: 12px; border: 2px solid #15171a; vertical-align: -2px; }
-  #legend { height: 10px; border-radius: 5px; margin: 6px 0 2px; }
-  #legendLabels { display: flex; justify-content: space-between; font-size: 12px; }
-  button { font: inherit; padding: 6px 10px; cursor: pointer; }
-  #status { min-height: 2.6em; margin-top: 8px; font-size: 13px; }
-  #status.err { color: #b3261e; }
-  #map { flex: 1; }
-  .leaflet-container { background: #f1efe9; }
-  @media (max-width: 700px) { body { flex-direction: column-reverse; } #panel { width: 100%; height: 55%; } }
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    color: var(--text-main);
+    background: var(--bg-app);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Map Container */
+  #map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  .leaflet-container {
+    background: #f1efe9;
+    font-family: var(--font-sans);
+  }
+  body.dark-theme .leaflet-container {
+    background: #0b0f17;
+  }
+  body.dark-theme .maplibregl-canvas {
+    filter: invert(1) hue-rotate(185deg) brightness(0.82) contrast(1.18);
+  }
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+  .leaflet-control-attribution {
+    background: var(--panel-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 11px !important;
+    color: var(--text-muted) !important;
+    border: 1px solid var(--panel-border) !important;
+    margin: 0 12px 12px 0 !important;
+    padding: 3px 8px !important;
+  }
+
+  /* Custom Radar Pulse Marker */
+  .radar-marker-wrap {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+  }
+  .radar-marker-wrap:active { cursor: grabbing; }
+  .radar-pulse-ring {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent-glow);
+    animation: radarRipple 2.2s cubic-bezier(0.1, 0.8, 0.2, 1) infinite;
+    pointer-events: none;
+  }
+  .radar-pulse-ring-2 {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    animation: radarRipple 2.2s cubic-bezier(0.1, 0.8, 0.2, 1) 0.7s infinite;
+    pointer-events: none;
+  }
+  .radar-core {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%);
+    border: 2.5px solid #ffffff;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .radar-marker-wrap:hover .radar-core {
+    transform: scale(1.18);
+  }
+  @keyframes radarRipple {
+    0% { transform: scale(0.35); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  /* Floating Sidebar Panel */
+  #panel {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    bottom: 18px;
+    width: 410px;
+    max-width: calc(100vw - 36px);
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-panel);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease;
+  }
+  #panel.collapsed {
+    transform: translateX(calc(-100% - 24px));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .panel-header {
+    padding: 20px 22px 14px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 14px var(--accent-glow);
+    flex-shrink: 0;
+  }
+  .brand-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--text-main);
+  }
+  .brand-title span {
+    color: var(--accent);
+  }
+  .brand-subtitle {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .city-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border-radius: 12px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 10.5px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .icon-btn:hover {
+    background: var(--panel-bg);
+    color: var(--text-main);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  /* Quick Navigation Chips */
+  .section-nav {
+    display: flex;
+    gap: 6px;
+    padding: 10px 22px;
+    border-bottom: 1px solid var(--panel-border);
+    background: rgba(0, 0, 0, 0.015);
+    flex-shrink: 0;
+  }
+  .nav-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .nav-chip:hover {
+    color: var(--text-main);
+    background: var(--card-bg);
+  }
+  .nav-chip.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border-color: rgba(13, 148, 136, 0.3);
+  }
+
+  /* Panel Scrollable Body */
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    scroll-behavior: smooth;
+  }
+  .panel-body::-webkit-scrollbar {
+    width: 6px;
+  }
+  .panel-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .panel-body::-webkit-scrollbar-thumb {
+    background: var(--panel-border);
+    border-radius: 3px;
+  }
+
+  /* Landmark Quick Jumper */
+  .landmark-box {
+    margin-bottom: 2px;
+  }
+  .landmark-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .landmark-carousel {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .landmark-carousel::-webkit-scrollbar { display: none; }
+  .landmark-btn {
+    flex-shrink: 0;
+    padding: 6px 11px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--card-border);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+  }
+  .landmark-btn:hover {
+    border-color: var(--accent);
+    background: var(--panel-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  }
+
+  /* Section Card */
+  .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s ease;
+  }
+  .section-card:hover {
+    border-color: rgba(13, 148, 136, 0.3);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+  }
+  .value-pill {
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Preset Pills */
+  .preset-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .preset-pill {
+    flex: 1;
+    padding: 6px 0;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1px solid var(--panel-border);
+    background: var(--panel-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .preset-pill:hover {
+    color: var(--text-main);
+    border-color: var(--accent);
+  }
+  .preset-pill.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px var(--accent-glow);
+  }
+
+  /* Custom Range Sliders */
+  .slider-wrapper {
+    position: relative;
+    margin: 8px 0 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 7px;
+    border-radius: 4px;
+    background: var(--track-bg);
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2.5px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.18);
+    box-shadow: 0 3px 12px var(--accent-glow);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2.5px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+  }
+  .slider-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* Modern Switch Toggles */
+  .toggle-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .custom-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    padding: 6px 0;
+    user-select: none;
+  }
+  .custom-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .toggle-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  .toggle-desc {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .toggle-switch-track {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    border-radius: 12px;
+    background: var(--track-bg);
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+    flex-shrink: 0;
+  }
+  .toggle-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s cubic-bezier(0.2, 0.85, 0.3, 1.2);
+  }
+  .custom-toggle input[type="checkbox"]:checked + .toggle-switch-track {
+    background: var(--accent);
+  }
+  .custom-toggle input[type="checkbox"]:checked + .toggle-switch-track .toggle-switch-thumb {
+    transform: translateX(16px);
+  }
+
+  /* Dot & Keyline Badges */
+  .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot.st {
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--text-main);
+  }
+  .keyline {
+    display: inline-block;
+    width: 16px;
+    height: 3.5px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+
+  /* Legend Container */
+  .legend-card {
+    margin-top: 6px;
+  }
+  .legend-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  #legend {
+    height: 10px;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+  }
+  #legendLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+
+  /* Live Stats Dashboard Cards */
+  #stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .stats-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .stats-hero {
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.12) 0%, rgba(2, 132, 199, 0.08) 100%);
+    border: 1px solid rgba(13, 148, 136, 0.25);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .stats-hero-main {
+    display: flex;
+    flex-direction: column;
+  }
+  .stats-hero-num {
+    font-size: 26px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stats-hero-num small {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .stats-hero-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .stats-hero-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .badge-pos {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16a34a;
+  }
+  .badge-neg {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .stats-micro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stats-micro-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+  }
+  .micro-val {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-main);
+  }
+  .micro-val small {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .micro-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .stats-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .badge-tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--panel-border);
+    color: var(--text-muted);
+    text-transform: none;
+  }
+
+  .stat-amenity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stat-amenity-row {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    transition: all 0.2s ease;
+  }
+  .stat-amenity-row:hover {
+    border-color: var(--accent);
+    transform: translateX(2px);
+  }
+  .stat-amenity-row.filter-dimmed {
+    opacity: 0.42;
+    filter: grayscale(0.85);
+  }
+  .stat-amenity-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .stat-amenity-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+  .stat-amenity-nums {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+  .num-cur {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .num-ref {
+    color: var(--text-faint);
+  }
+  .stat-amenity-bar {
+    height: 4px;
+    background: var(--track-bg);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stat-amenity-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* Metro Proximity Card */
+  .metro-reach-card {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.09) 0%, rgba(14, 165, 233, 0.05) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.28);
+    border-radius: var(--radius-lg);
+    padding: 13px 15px;
+    margin-top: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .metro-reach-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .metro-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .metro-icon-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1e40af;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.4);
+  }
+  .metro-main-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .metro-sub-title {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .metro-status-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+  .metro-status-pill.m-active {
+    background: rgba(37, 99, 235, 0.15);
+    color: #2563eb;
+  }
+  .metro-status-pill.m-idle {
+    background: var(--track-bg);
+    color: var(--text-muted);
+  }
+  .metro-station-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .metro-item-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 11px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .metro-item-pill:hover {
+    border-color: #2563eb;
+    background: var(--panel-bg);
+    transform: translateX(2px);
+  }
+  .m-item-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .m-glyph {
+    color: #1e40af;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  .m-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .m-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .m-time-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: #1e40af;
+    background: rgba(37, 99, 235, 0.12);
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+  .m-wc-tag {
+    font-size: 11px;
+  }
+  .metro-empty-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    padding: 4px 2px;
+  }
+  .metro-dot-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1e40af;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  /* Train / Suburban Rail Connectivity Card */
+  .train-reach-card {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%);
+    border: 1px solid rgba(220, 38, 38, 0.28);
+    border-radius: var(--radius-lg);
+    padding: 13px 15px;
+    margin-top: 12px;
+    box-shadow: var(--shadow-card);
+  }
+  .train-reach-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .train-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .train-icon-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  }
+  .train-main-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .train-sub-title {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .train-status-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+  .train-status-pill.t-active {
+    background: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+  }
+  .train-status-pill.t-idle {
+    background: var(--track-bg);
+    color: var(--text-muted);
+  }
+  .train-station-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .train-item-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 11px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .train-item-pill:hover {
+    border-color: #dc2626;
+    background: var(--panel-bg);
+    transform: translateX(2px);
+  }
+  .t-item-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .t-glyph {
+    color: #dc2626;
+    font-size: 13px;
+  }
+  .t-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .t-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .t-time-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: #b91c1c;
+    background: rgba(220, 38, 38, 0.12);
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+  .t-wc-tag {
+    font-size: 11px;
+  }
+  .train-empty-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    padding: 4px 2px;
+  }
+  .rail-dot-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #dc2626;
+    color: white;
+    font-size: 10px;
+  }
+
+  /* Bus Terminals & Major Stands Card */
+  .bus-reach-card {
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+    border: 1px solid rgba(13, 148, 136, 0.28);
+    border-radius: var(--radius-lg);
+    padding: 13px 15px;
+    margin-top: 12px;
+    box-shadow: var(--shadow-card);
+  }
+  .bus-reach-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .bus-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .bus-icon-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #0d9488;
+    color: #ffffff;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
+  }
+  .bus-main-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .bus-sub-title {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .bus-status-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+  }
+  .bus-status-pill.b-active {
+    background: rgba(13, 148, 136, 0.15);
+    color: #0d9488;
+  }
+  .bus-status-pill.b-idle {
+    background: var(--track-bg);
+    color: var(--text-muted);
+  }
+  .bus-station-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bus-item-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 11px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .bus-item-pill:hover {
+    border-color: #0d9488;
+    background: var(--panel-bg);
+    transform: translateX(2px);
+  }
+  .b-item-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .b-glyph {
+    color: #0d9488;
+    font-size: 13px;
+  }
+  .b-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .b-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .b-time-badge {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: #0f766e;
+    background: rgba(13, 148, 136, 0.12);
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+  .b-wc-tag {
+    font-size: 11px;
+  }
+  .bus-empty-hint {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    padding: 4px 2px;
+  }
+  .bus-dot-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0d9488;
+    color: white;
+    font-size: 10px;
+  }
+
+  .station-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .station-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+  }
+  .station-meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 500;
+  }
+  .station-nums {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+  .station-nums .ref {
+    color: var(--text-faint);
+  }
+  .stats-subnote {
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.03);
+  }
+  body.dark-theme .stats-subnote {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Status Banner */
+  #status {
+    min-height: 20px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #status:empty { display: none; }
+  #status.err {
+    color: #ef4444;
+  }
+
+  /* Footer Controls & Share */
+  .panel-footer {
+    padding: 14px 22px 18px;
+    border-top: 1px solid var(--panel-border);
+    background: var(--panel-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .share-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px var(--accent-glow);
+    transition: all 0.2s ease;
+  }
+  .share-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px var(--accent-glow);
+  }
+  .share-btn:active {
+    transform: translateY(0);
+  }
+  #copyMsg {
+    font-size: 11.5px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: center;
+    min-height: 14px;
+  }
+
+  .note-disclaimer {
+    font-size: 11px;
+    color: var(--text-faint);
+    line-height: 1.4;
+  }
+
+  /* Floating Map HUD */
+  .map-floating-hint {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 900;
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    padding: 7px 16px;
+    border-radius: 30px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    box-shadow: var(--shadow-float);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .pulse-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: indicatorPulse 1.8s infinite;
+  }
+  @keyframes indicatorPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+  }
+
+  /* Floating Map Action Buttons (Bottom-Right) */
+  .map-actions {
+    position: absolute;
+    bottom: 24px;
+    right: 20px;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .map-action-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    box-shadow: var(--shadow-float);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .map-action-btn:hover {
+    background: var(--card-bg);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  /* Floating Open Panel Button */
+  #openPanelBtn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 850;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    box-shadow: var(--shadow-float);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  #openPanelBtn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  /* Toast Notification */
+  #toast {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow-float);
+    backdrop-filter: blur(20px);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Mobile Layout */
+  @media (max-width: 768px) {
+    #panel {
+      top: auto;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      width: calc(100vw - 20px);
+      max-height: 65vh;
+      border-radius: var(--radius-xl);
+    }
+    #panel.collapsed {
+      transform: translateY(calc(100% + 20px));
+    }
+    .map-floating-hint {
+      top: 14px;
+      font-size: 11px;
+      padding: 5px 12px;
+    }
+    .map-actions {
+      bottom: auto;
+      top: 60px;
+      right: 12px;
+    }
+  }
 </style>
 </head>
 <body>
+
+<!-- Map Container -->
+<div id="map"></div>
+
+<!-- Floating Map Instruction Pill -->
+<div class="map-floating-hint">
+  <div class="pulse-indicator"></div>
+  <span>Click street or drag beacon to evaluate reach</span>
+</div>
+
+<!-- Floating Map Controls (Zoom, Geolocation, Reset) -->
+<div class="map-actions">
+  <button type="button" class="map-action-btn" id="locateBtn" title="Find my location">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="12 2 15 12 12 15 9 12 12 2"></polygon></svg>
+  </button>
+  <button type="button" class="map-action-btn" id="zoomInBtn" title="Zoom in">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  </button>
+  <button type="button" class="map-action-btn" id="zoomOutBtn" title="Zoom out">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  </button>
+  <button type="button" class="map-action-btn" id="resetViewBtn" title="Reset view">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+  </button>
+</div>
+
+<!-- Floating Open Sidebar Button (when sidebar is hidden) -->
+<button type="button" id="openPanelBtn" title="Open explorer panel">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+</button>
+
+<!-- Main Floating Control Panel -->
 <div id="panel">
-  <h1>15 minutes.<br><span>For whom?</span></h1>
-  <div class="note">Click the map or drag the marker. Coloured streets are what you can reach with your settings, coloured by walking time. Grey streets are reachable at 1.4 m/s with stairs allowed, but not with your settings.</div>
-
-  <div class="ctl" id="cityBox" style="display:none"><label>City
-    <select id="city" style="width:100%;font:inherit;padding:4px"></select></label></div>
-
-  <div class="ctl"><label>Time budget: <b id="minOut">15</b> min
-    <input type="range" id="minutes" min="5" max="30" value="15"></label></div>
-
-  <div class="ctl"><label>Walking speed: <b id="spdOut"></b>
-    <input type="range" id="speed" min="0.8" max="1.8" step="0.05" value="1.4"></label>
-    <div class="note">Range 0.8–1.8 m/s from the meta-study by Giannoulaki &amp; Christoforou.</div></div>
-
-  <div class="ctl"><label><input type="checkbox" id="steps"> Avoid stairs (step-free)</label></div>
-
-  <div class="ctl">
-    <div id="legend"></div>
-    <div id="legendLabels"><span>0 min</span><span id="legendEnd"></span></div>
+  <!-- Header -->
+  <div class="panel-header">
+    <div class="brand-group">
+      <div class="brand-icon">🚶</div>
+      <div>
+        <h1 class="brand-title">15-min <span>City</span></h1>
+        <div class="brand-subtitle">
+          <span>Kolkata Walkability & Equity</span>
+          <span class="city-badge">OSM Data</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" id="themeToggleBtn" title="Toggle dark/light theme">
+        <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </button>
+      <button type="button" class="icon-btn" id="closePanelBtn" title="Collapse sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+    </div>
   </div>
 
-  <div class="ctl"><button id="copyLink" type="button">Copy link to this view</button> <span class="note" id="copyMsg"></span></div>
+  <!-- Section Quick Links -->
+  <div class="section-nav">
+    <a href="#sec-controls" class="nav-chip active" id="chipControls">⏱️ Journey</a>
+    <a href="#sec-analytics" class="nav-chip" id="chipAnalytics">📊 Metrics</a>
+    <a href="#sec-layers" class="nav-chip" id="chipLayers">🎛️ Layers</a>
+  </div>
 
-  <div class="ctl"><label><input type="checkbox" id="showAm" checked> Show amenities</label><br>
-    <label><input type="checkbox" id="showSt" checked> Show stations within reach</label><br>
-    <label><input type="checkbox" id="showBn"> Show benches <span class="dot" style="background:#8a5a2b;width:7px;height:7px;margin:0 0 0 2px;vertical-align:middle"></span></label><br>
-    <label><input type="checkbox" id="showSteps"> Show stairs <span class="keyline" style="background:#c1272d"></span><span id="rampHint" style="display:none"> <span class="keyline" style="background:#e8a13a"></span> with wheelchair ramp</span></label></div>
+  <!-- Body -->
+  <div class="panel-body">
+    <!-- Landmark Presets -->
+    <div class="landmark-box">
+      <div class="landmark-title">
+        <span>Kolkata Landmarks</span>
+        <span style="font-weight: normal; font-size: 10.5px;">Click to teleport</span>
+      </div>
+      <div class="landmark-carousel">
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5648, 88.3515, 'Esplanade Bus Terminus')">🚌 Esplanade Bus Terminus</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5862, 88.3430, 'Howrah Bus Station')">🚌 Howrah Bus Station</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5856, 88.4210, 'Karunamoyee Bus Terminus')">🚌 Karunamoyee Bus Terminus</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.4957, 88.3706, 'Jadavpur 8B Bus Stand')">🚌 Jadavpur 8B Bus Stand</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5829, 88.3428, 'Howrah Junction (HWH)')">🚉 Howrah Junction (HWH)</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5680, 88.3711, 'Sealdah Railway Station')">🚉 Sealdah Station (SDAH)</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.6013, 88.3842, 'Kolkata Chitpur Terminal')">🚉 Kolkata Chitpur (KOAA)</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5448, 88.3426, 'Victoria Memorial')">🏛️ Victoria Memorial</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5646, 88.3515, 'Esplanade Metro')">Ⓜ️ Esplanade Metro (Line 1 &amp; 2)</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5839, 88.3426, 'Howrah Metro')">Ⓜ️ Howrah Metro (Underwater)</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5511, 88.3524, 'Park Street Metro')">Ⓜ️ Park Street Metro</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5191, 88.3461, 'Kalighat Metro')">Ⓜ️ Kalighat Metro</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5700, 88.4330, 'Sector V Metro')">Ⓜ️ Salt Lake Sector V</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.5744, 88.3639, 'College Street')">📚 College Street</button>
+        <button type="button" class="landmark-btn" onclick="teleportTo(22.6000, 88.4600, 'Eco Park New Town')">🌳 Eco Park</button>
+      </div>
+    </div>
 
-  <div id="stats"></div>
-  <div id="status">Loading street network…</div>
-  <div class="note">Not included: public transport travel, slope, lighting. Street, amenity and station data come from OpenStreetMap and are incomplete in places. Stations count as step-free only if OSM tags them wheelchair=yes.</div>
-  <div class="note" id="baseNote" style="margin-top:8px"></div>
+    <!-- City Selector (if multiple cities exist) -->
+    <div class="ctl" id="cityBox" style="display:none">
+      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">City
+        <select id="city" style="width:100%;font:inherit;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--panel-border);background:var(--card-bg);color:var(--text-main)"></select>
+      </label>
+    </div>
+
+    <!-- Section: Controls -->
+    <div id="sec-controls" class="section-card">
+      <!-- Time Budget -->
+      <div class="section-header">
+        <h3 class="section-title">⏱️ Time Budget</h3>
+        <span class="value-pill"><b id="minOut">15</b> min</span>
+      </div>
+      <div class="preset-row" id="timePresets">
+        <button type="button" class="preset-pill" data-min="5">5m</button>
+        <button type="button" class="preset-pill" data-min="10">10m</button>
+        <button type="button" class="preset-pill active" data-min="15">15m</button>
+        <button type="button" class="preset-pill" data-min="20">20m</button>
+        <button type="button" class="preset-pill" data-min="30">30m</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" id="minutes" min="5" max="30" value="15">
+      </div>
+
+      <!-- Walking Speed -->
+      <div class="section-header" style="margin-top: 18px;">
+        <h3 class="section-title">🚶 Walking Speed</h3>
+        <span class="value-pill" id="spdOut" style="font-size:11px;">1.40 m/s (5.0 km/h)</span>
+      </div>
+      <div class="preset-row" id="speedPresets">
+        <button type="button" class="preset-pill" data-spd="0.9">🐢 0.9 m/s</button>
+        <button type="button" class="preset-pill active" data-spd="1.4">🚶 1.4 m/s</button>
+        <button type="button" class="preset-pill" data-spd="1.7">⚡ 1.7 m/s</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" id="speed" min="0.8" max="1.8" step="0.05" value="1.4">
+      </div>
+      <div class="slider-hint">Meta-study range 0.8–1.8 m/s (Giannoulaki &amp; Christoforou).</div>
+
+      <!-- Avoid Stairs Toggle -->
+      <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-border);">
+        <label class="custom-toggle">
+          <input type="checkbox" id="steps">
+          <span class="toggle-text">
+            <span>♿ Avoid stairs (step-free)</span>
+            <span class="toggle-desc">Filters routes & transit stops for barrier-free access</span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Section: Analytics & Stats -->
+    <div id="sec-analytics">
+      <div id="stats"></div>
+      <div id="status">Loading street network…</div>
+    </div>
+
+    <!-- Section: Layers & Legend -->
+    <div id="sec-layers" class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">🎛️ Map Layers</h3>
+      </div>
+      <div class="toggle-group">
+        <label class="custom-toggle">
+          <input type="checkbox" id="showRail" checked>
+          <span class="toggle-text">
+            <span class="rail-dot-glyph">🚆</span>
+            <span><b>Suburban Railway Stations (ER / SER)</b></span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showMetro" checked>
+          <span class="toggle-text">
+            <span class="metro-dot-glyph">Ⓜ</span>
+            <span><b>Kolkata Metro Stations &amp; Gates</b></span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showBusStation" checked>
+          <span class="toggle-text">
+            <span class="bus-dot-glyph">🚌</span>
+            <span><b>Bus Terminals &amp; Major Stands</b></span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showSt" checked>
+          <span class="toggle-text">
+            <span class="dot st" style="background:#0284c7"></span>
+            <span>Bus, Tram &amp; Hooghly Ferry Ghats</span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showAm" checked>
+          <span class="toggle-text">
+            <span class="dot" style="background:#16a34a"></span>
+            <span>Urban amenities (Food, Health, Culture, Civic)</span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showBn">
+          <span class="toggle-text">
+            <span class="dot" style="background:#b45309;width:7px;height:7px"></span>
+            <span>Rest benches</span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showSteps">
+          <span class="toggle-text">
+            <span class="keyline" style="background:#c1272d"></span>
+            <span>Show stairs &amp; pedestrian barriers</span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+      </div>
+
+      <div id="rampHint" style="display:none; font-size:11.5px; margin-top:8px; color:var(--text-muted);">
+        <span class="keyline" style="background:#e8a13a"></span> with wheelchair ramp (passable)
+      </div>
+
+      <!-- Isochrone Legend -->
+      <div class="legend-card" style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-border);">
+        <div class="legend-header">
+          <span style="font-weight: 700; color: var(--text-main);">Walking Time Isochrones</span>
+          <span>0 — <b id="legendEnd">15 min</b></span>
+        </div>
+        <div id="legend"></div>
+        <div id="legendLabels">
+          <span>0 min</span>
+          <span>Nearest</span>
+          <span>Farthest</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basemap note / Attribution info -->
+    <div class="note-disclaimer">
+      Data © OpenStreetMap contributors. Basemap © OpenFreeMap, © OpenMapTiles.
+      Not included: public transport scheduling, slope, waterlogging, or pavement encroachment.
+    </div>
+    <div class="note-disclaimer" id="baseNote"></div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="panel-footer">
+    <button id="copyLink" type="button" class="share-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      <span>Share View Link</span>
+    </button>
+    <div id="copyMsg"></div>
+  </div>
 </div>
-<div id="map"></div>
+
+<!-- Toast element -->
+<div id="toast">
+  <span id="toastIcon">✨</span>
+  <span id="toastMsg">Notification message</span>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="vendor/leaflet-maplibre-gl.js"></script>
 
-<!-- ============ CORE: no browser or Leaflet dependencies, so it can be tested in Node ============ -->
+<!-- ============ CORE: graph parsing and Dijkstra ============ -->
 <script id="core">
-const R_LAT = 110540, R_LON = 111320;   // metres per degree (equirectangular, fine at city scale)
+const R_LAT = 110540, R_LON = 111320;   // metres per degree
 
-// graph.bin and tile files: layouts are described in export_city.py (version 1 = one whole city,
-// version 2 = one tile, which also carries the node numbers of the whole city and its amenities as JSON)
 function buildAdjacency(nN, nE, eu, ev) {
   const deg = new Uint32Array(nN + 1);
   for (let e = 0; e < nE; e++) { deg[eu[e]]++; deg[ev[e]]++; }
@@ -118,15 +1680,12 @@ function parseGraph(buf) {
   return { nN, nE, lon, lat, mx, my, eu, ev, elen, eflag, sst, smx, smy, adjStart, adjEdge, ids, poiOff: off, poiLen };
 }
 
-// one tile: its street graph, plus the amenities that lie inside it
 function parseTile(buf) {
   const graph = parseGraph(buf);
   const pts = graph.poiLen > 0 ? JSON.parse(new TextDecoder().decode(new Uint8Array(buf, graph.poiOff, graph.poiLen))) : [];
   return { graph, pts };
 }
 
-// Join several tiles into one graph. A node is the same node in every tile because tiles carry the node's
-// number from the whole city (ids); an edge that crosses a tile border sits in two tiles and is kept once.
 function mergeGraphs(parts, total) {
   const nodeMap = new Int32Array(total).fill(-1);
   const lon = [], lat = [], mx = [], my = [], gids = [];
@@ -142,7 +1701,7 @@ function mergeGraphs(parts, total) {
     for (let e = 0; e < p.nE; e++) {
       const gu = p.ids[p.eu[e]], gv = p.ids[p.ev[e]], flag = p.eflag[e];
       const lo = gu < gv ? gu : gv, hi = gu < gv ? gv : gu;
-      const key = (lo * total + hi) * 4 + (flag & 3);   // the same street segment, whichever tile it comes from
+      const key = (lo * total + hi) * 4 + (flag & 3);
       if (seen.has(key)) continue;
       seen.add(key);
       eu.push(nodeOf(p, p.eu[e])); ev.push(nodeOf(p, p.ev[e]));
@@ -158,7 +1717,6 @@ function mergeGraphs(parts, total) {
   return Object.assign(g, buildAdjacency(nN, nE, g.eu, g.ev));
 }
 
-// which tiles cover a circle of radiusM metres around a point (t = tile grid from meta.json, have = Set of tile keys that exist)
 function tileKeysFor(t, have, lat, lon, radiusM) {
   const dLat = radiusM / R_LAT, dLon = radiusM / (R_LON * Math.cos(lat * Math.PI / 180));
   const x0 = Math.floor((lon - dLon - t.lon0) / t.dlon), x1 = Math.floor((lon + dLon - t.lon0) / t.dlon);
@@ -184,7 +1742,6 @@ function buildGrid(g) {
   return { minLon, minLat, cellLon, cellLat, W, H, head, next };
 }
 
-// nearest street node to a point; { node: -1 } if nothing within about maxRing cells
 function nearestNode(g, grid, lon, lat, maxRing = 8) {
   const cx = Math.floor((lon - grid.minLon) / grid.cellLon), cy = Math.floor((lat - grid.minLat) / grid.cellLat);
   const cosL = Math.cos(lat * Math.PI / 180);
@@ -197,7 +1754,6 @@ function nearestNode(g, grid, lon, lat, maxRing = 8) {
       if (x < 0 || y < 0 || x >= grid.W || y >= grid.H) continue;
       for (let i = grid.head[y * grid.W + x]; i !== -1; i = grid.next[i]) {
         const d = Math.hypot((g.lon[i] - lon) * cosL * R_LON, (g.lat[i] - lat) * R_LAT);
-        // on an exact tie take the node with the lower number from the whole city, so the answer does not depend on load order
         if (d < bestD || (d === bestD && (g.ids ? g.ids[i] < g.ids[best] : i < best))) { bestD = d; best = i; }
       }
     }
@@ -206,7 +1762,6 @@ function nearestNode(g, grid, lon, lat, maxRing = 8) {
   return { node: best, dist: bestD };
 }
 
-// Dijkstra over walking time; stops at T seconds. Speed in m/s. Returns seconds per node (Infinity = not reached).
 function dijkstra(g, src, startSeconds, speed, avoidSteps, T) {
   const dist = new Float64Array(g.nN).fill(Infinity);
   const ht = [], hn = [];
@@ -243,102 +1798,185 @@ function dijkstra(g, src, startSeconds, speed, avoidSteps, T) {
   return dist;
 }
 
-// the edge as a flat [x0, y0, x1, y1, ...] path in mercator units, running from its low node to its high node (or reversed)
 function edgePath(g, e, reverse) {
   const u = g.eu[e], v = g.ev[e], pts = [g.mx[u], g.my[u]];
   for (let s = g.sst[e]; s < g.sst[e + 1]; s++) pts.push(g.smx[s], g.smy[s]);
   pts.push(g.mx[v], g.my[v]);
   if (!reverse) return pts;
-  const out = [];
-  for (let i = pts.length - 2; i >= 0; i -= 2) out.push(pts[i], pts[i + 1]);
-  return out;
+  const rev = new Float64Array(pts.length), n = pts.length / 2;
+  for (let i = 0; i < n; i++) { rev[2 * i] = pts[2 * (n - 1 - i)]; rev[2 * i + 1] = pts[2 * (n - 1 - i) + 1]; }
+  return rev;
 }
 
-// the first `frac` (0..1) of a path's length
 function cutPath(pts, frac) {
+  if (frac <= 0) return pts.slice(0, 2);
   if (frac >= 1) return pts;
-  let total = 0;
-  for (let i = 2; i < pts.length; i += 2) total += Math.hypot(pts[i] - pts[i - 2], pts[i + 1] - pts[i - 1]);
-  let left = frac * total;
+  const n = pts.length / 2, segLen = new Float64Array(n - 1);
+  let tot = 0;
+  for (let i = 0; i < n - 1; i++) {
+    segLen[i] = Math.hypot(pts[2 * i + 2] - pts[2 * i], pts[2 * i + 3] - pts[2 * i + 1]);
+    tot += segLen[i];
+  }
+  if (tot === 0) return pts.slice(0, 2);
+  let target = tot * frac, accum = 0;
   const out = [pts[0], pts[1]];
-  for (let i = 2; i < pts.length; i += 2) {
-    const seg = Math.hypot(pts[i] - pts[i - 2], pts[i + 1] - pts[i - 1]);
-    if (seg >= left) {
-      const f = seg > 0 ? left / seg : 0;
-      out.push(pts[i - 2] + (pts[i] - pts[i - 2]) * f, pts[i - 1] + (pts[i + 1] - pts[i - 1]) * f);
+  for (let i = 0; i < n - 1; i++) {
+    const sl = segLen[i];
+    if (accum + sl >= target) {
+      const t = sl > 0 ? (target - accum) / sl : 0;
+      out.push(pts[2 * i] + t * (pts[2 * i + 2] - pts[2 * i]), pts[2 * i + 1] + t * (pts[2 * i + 3] - pts[2 * i + 1]));
       return out;
     }
-    left -= seg; out.push(pts[i], pts[i + 1]);
+    accum += sl;
+    out.push(pts[2 * i + 2], pts[2 * i + 3]);
   }
-  return out;
+  return pts;
 }
 
-// every edge that is at least partly reachable: { e, fromLow, frac (share of the edge reached), tt (0..1 walking time) }
 function collectReach(g, dist, T, speed, avoidSteps) {
   const items = [];
   let lengthM = 0;
   for (let e = 0; e < g.nE; e++) {
     if (avoidSteps && (g.eflag[e] & 1)) continue;
     const du = dist[g.eu[e]], dv = dist[g.ev[e]];
-    const fromLow = du <= dv, a = fromLow ? du : dv, b = fromLow ? dv : du;
-    if (a > T) continue;
-    let frac = 1, tt;
-    if (b <= T) tt = b / T;
-    else { frac = Math.min(1, (T - a) / (g.elen[e] / speed)); tt = 1; }
-    items.push({ e, fromLow, frac, tt });
-    lengthM += g.elen[e] * frac;
+    if (du === Infinity && dv === Infinity) continue;
+    const len = g.elen[e], span = len / speed;
+    let reachU = Math.max(0, Math.min(len, (T - du) * speed));
+    let reachV = Math.max(0, Math.min(len, (T - dv) * speed));
+    if (du !== Infinity && dv !== Infinity && du + dv + span <= 2 * T) {
+      const tt = (Math.min(du, dv) + Math.min(T, Math.max(du, dv))) / (2 * T);
+      items.push({ e, frac: 1, tt, fromLow: du <= dv });
+      lengthM += len;
+    } else {
+      const best = Math.max(reachU, reachV);
+      if (best > 0) {
+        const fromLow = reachU >= reachV, dBest = fromLow ? du : dv;
+        const frac = best / len;
+        const tt = (dBest + Math.min(T, dBest + best / speed)) / (2 * T);
+        items.push({ e, frac, tt, fromLow });
+        lengthM += best;
+      }
+    }
   }
   return { items, lengthM };
 }
 
-// for each point of interest: nearest street node and straight-line distance to it
 function snapPois(g, grid, pts) {
   const node = new Int32Array(pts.length), snap = new Float32Array(pts.length);
   for (let i = 0; i < pts.length; i++) {
-    const r = nearestNode(g, grid, pts[i][0], pts[i][1], 6);
-    node[i] = r.node; snap[i] = r.node < 0 ? Infinity : r.dist;
+    const near = nearestNode(g, grid, pts[i][0], pts[i][1], 8);
+    node[i] = near.node;
+    snap[i] = near.node >= 0 ? near.dist : Infinity;
   }
   return { node, snap };
 }
 </script>
 
-<!-- ============ APP ============ -->
+<!-- ============ APPLICATION LOGIC ============ -->
 <script>
-// Basemap: OpenFreeMap vector tiles (free, no key, no request limits). Other styles: liberty, bright.
 const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
-const DATA_ROOT = "data/";   // one folder per city, plus cities.json (the list for the menu)
-const REF_SPEED = 1.4;                        // reference walking speed, m/s (the slider default)
-const CAT_COLORS = ["#5b9a3c", "#d9534f", "#7b5ea7", "#2e8b57", "#e8a13a", "#8a5a2b", "#15171a"];
-// station dots by OSM wheelchair tag: 0 not tagged, 1 yes, 2 limited, 3 no
+const DATA_ROOT = "data/";
+const REF_SPEED = 1.4;
+const CAT_COLORS = [
+  "#16a34a", // 0: Groceries & Essentials
+  "#dc2626", // 1: Healthcare
+  "#7c3aed", // 2: Education
+  "#059669", // 3: Parks & Recreation
+  "#ea580c", // 4: Dining & Cafés
+  "#b45309", // 5: Rest Benches
+  "#1e40af", // 6: Metro Stations (Iconic Kolkata Metro Blue)
+  "#475569", // 7: Civic & Financial
+  "#d97706", // 8: Culture & Worship
+  "#06b6d4", // 9: Sanitation & Water
+  "#0284c7", // 10: Local Bus, Tram & Ferry Stops
+  "#dc2626", // 11: Suburban Railway Stations (Indian Railways Crimson)
+  "#0d9488"  // 12: Bus Terminals & Stations (Teal / Emerald)
+];
 const STATION_COLORS = ["#aaaaaa", "#2e8b57", "#e8a13a", "#555555"];
-const PALETTE = ["#0b4f6c", "#1f9e9a", "#9bc53d", "#f2c14e", "#e8743b"];   // walking time, near to far
+const PALETTE = ["#0b4f6c", "#1f9e9a", "#9bc53d", "#f2c14e", "#e8743b"];
+
+let activeCatFilter = new Set([0, 1, 2, 3, 4, 7, 8, 9]);
+function toggleCatFilter(c) {
+  if (activeCatFilter.has(c)) activeCatFilter.delete(c);
+  else activeCatFilter.add(c);
+  draw();
+  document.querySelectorAll(`.cat-row-${c}`).forEach(el => el.classList.toggle("filter-dimmed", !activeCatFilter.has(c)));
+}
+
+let metroHighlight = null;
+function flyToMetro(lat, lon, name) {
+  map.flyTo([lat, lon], 16, { duration: 1.2 });
+  if (metroHighlight) { map.removeLayer(metroHighlight); }
+  metroHighlight = L.circleMarker([lat, lon], {
+    radius: 12,
+    color: "#38bdf8",
+    fillColor: "#1e3a8a",
+    fillOpacity: 0.9,
+    weight: 3
+  }).addTo(map);
+  metroHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>Ⓜ ${name} Metro</b><div style="font-size:11px;color:#64748b;margin-top:2px;">Kolkata Metro Network</div></div>`).openPopup();
+  setTimeout(() => { if (metroHighlight) { map.removeLayer(metroHighlight); metroHighlight = null; } }, 5000);
+  showToast(`Centered on Ⓜ ${name} Metro`, "Ⓜ️");
+}
+
+let trainHighlight = null;
+function flyToTrain(lat, lon, name) {
+  map.flyTo([lat, lon], 16, { duration: 1.2 });
+  if (trainHighlight) { map.removeLayer(trainHighlight); }
+  trainHighlight = L.circleMarker([lat, lon], {
+    radius: 13,
+    color: "#fef08a",
+    fillColor: "#dc2626",
+    fillOpacity: 0.95,
+    weight: 3.5
+  }).addTo(map);
+  trainHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>🚆 ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">Indian Railways • Kolkata Suburban Network</div></div>`).openPopup();
+  setTimeout(() => { if (trainHighlight) { map.removeLayer(trainHighlight); trainHighlight = null; } }, 5000);
+  showToast(`Centered on 🚆 ${name}`, "🚆");
+}
+
+let busHighlight = null;
+function flyToBusStation(lat, lon, name) {
+  map.flyTo([lat, lon], 16, { duration: 1.2 });
+  if (busHighlight) { map.removeLayer(busHighlight); }
+  busHighlight = L.circleMarker([lat, lon], {
+    radius: 13,
+    color: "#a7f3d0",
+    fillColor: "#0d9488",
+    fillOpacity: 0.95,
+    weight: 3.5
+  }).addTo(map);
+  busHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>🚌 ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">Kolkata Bus Terminus / Major Stand</div></div>`).openPopup();
+  setTimeout(() => { if (busHighlight) { map.removeLayer(busHighlight); busHighlight = null; } }, 5000);
+  showToast(`Centered on 🚌 ${name}`, "🚌");
+}
 
 const $ = id => document.getElementById(id);
 const statusEl = $("status");
 
-// ---------- map ----------
-const map = L.map("map", { zoomControl: true, maxZoom: 19 }).setView([22.5726, 88.3639], 14);
+// Map instance
+const map = L.map("map", { zoomControl: false, maxZoom: 19 }).setView([22.5726, 88.3639], 14);
 let baseLayer = null, streetBase = false, mapErrors = 0;
-// Basemap of last resort: if the background map cannot be shown (no WebGL, a script that did not load, or the tile
-// service refusing requests), stop using it and draw the street network itself, which needs no outside service.
+
 function useStreetBase(reason) {
   if (streetBase) return;
   streetBase = true;
-  try { if (baseLayer) map.removeLayer(baseLayer); } catch (e) { /* already gone */ }
+  try { if (baseLayer) map.removeLayer(baseLayer); } catch (e) { }
   map.attributionControl.addAttribution("&copy; OpenStreetMap contributors");
-  document.getElementById("baseNote").textContent = "The background map is unavailable (" + String(reason || "unknown reason").slice(0, 160) + "), so the street network is shown instead.";
+  $("baseNote").textContent = "Background map fallback: " + String(reason || "service unavailable").slice(0, 140);
   draw();
 }
+
 try {
   baseLayer = L.maplibreGL({
     style: BASEMAP_STYLE,
-    attributionControl: { customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>' }
+    attributionControl: { customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Data: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>' }
   }).addTo(map);
-  // count failed tile loads (MapLibre also reports harmless style warnings, which have no tile or source)
+
   let logged = 0;
   baseLayer.getMaplibreMap().on("error", e => {
     const msg = e && e.error && e.error.message ? e.error.message : "unknown error";
-    if (logged++ < 10) console.warn("Basemap error:", msg, "| source:", e && e.sourceId);
+    if (logged++ < 10) console.warn("Basemap error:", msg);
     if (e && (e.tile || e.sourceId) && ++mapErrors >= 8) useStreetBase(msg);
   });
 } catch (err) {
@@ -346,22 +1984,38 @@ try {
   baseLayer = null;
   setTimeout(() => useStreetBase(err && err.message ? err.message : err), 0);
 }
+
+// Canvas layer for reach network
 const canvas = document.createElement("canvas");
 canvas.className = "leaflet-zoom-hide";
 canvas.style.cssText = "position:absolute;pointer-events:none";
 map.getPanes().overlayPane.appendChild(canvas);
 
 let G = null, grid = null, POIS = null, poiMx = null, poiMy = null, poiSnap = null;
-// city and tile state (tiled cities load only the tiles around the point you click)
 let CITIES = [], CITY = "kolkata", DATA_DIR = DATA_ROOT + "kolkata/", META = null;
 let tileSet = null, tileCache = new Map(), tileInflight = new Map(), activeKeys = "";
 let computeToken = 0, needSnap = false, hashHadOrigin = false;
 let origin = L.latLng(22.5726, 88.3639), state = null, queued = false;
-const marker = L.marker(origin, { draggable: true }).addTo(map);
 
-// ---------- helpers ----------
+// Custom radar pulse pin
+const radarIcon = L.divIcon({
+  className: "radar-marker-wrap",
+  html: `
+    <div class="radar-pulse-ring"></div>
+    <div class="radar-pulse-ring-2"></div>
+    <div class="radar-core">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle></svg>
+    </div>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18]
+});
+const marker = L.marker(origin, { draggable: true, icon: radarIcon }).addTo(map);
+
+// Colors & Interpolation
 function mix(c1, c2, f) {
-  const a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16), ch = s => (a >> s & 255) + ((b >> s & 255) - (a >> s & 255)) * f;
+  const a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16);
+  const ch = s => (a >> s & 255) + ((b >> s & 255) - (a >> s & 255)) * f;
   return `rgb(${ch(16) | 0},${ch(8) | 0},${ch(0) | 0})`;
 }
 function colorAt(t) {
@@ -371,12 +2025,35 @@ function colorAt(t) {
 const NB = 12, BIN_COLORS = Array.from({ length: NB }, (_, i) => colorAt((i + 0.5) / NB));
 $("legend").style.background = `linear-gradient(to right, ${Array.from({ length: 11 }, (_, i) => colorAt(i / 10)).join(",")})`;
 
+// UI Helpers
+function updateSliderTrack(el) {
+  const min = +el.min || 0, max = +el.max || 100, val = +el.value;
+  const pct = ((val - min) / (max - min)) * 100;
+  el.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent-light) ${pct}%, var(--track-bg) ${pct}%, var(--track-bg) 100%)`;
+}
+
+function syncPresetPills() {
+  const curMin = $("minutes").value;
+  document.querySelectorAll("#timePresets .preset-pill").forEach(p => {
+    p.classList.toggle("active", p.getAttribute("data-min") === curMin);
+  });
+  const curSpd = parseFloat($("speed").value).toFixed(1);
+  document.querySelectorAll("#speedPresets .preset-pill").forEach(p => {
+    p.classList.toggle("active", parseFloat(p.getAttribute("data-spd")).toFixed(1) === curSpd);
+  });
+}
+
 function labels() {
-  $("minOut").textContent = $("minutes").value;
-  $("legendEnd").textContent = $("minutes").value + " min";
+  const m = $("minutes").value;
+  $("minOut").textContent = m;
+  $("legendEnd").textContent = m + " min";
   const v = +$("speed").value;
   $("spdOut").textContent = `${v.toFixed(2)} m/s (${(v * 3.6).toFixed(1)} km/h)`;
+  updateSliderTrack($("minutes"));
+  updateSliderTrack($("speed"));
+  syncPresetPills();
 }
+
 function schedule() {
   labels();
   if (queued) return;
@@ -384,29 +2061,28 @@ function schedule() {
   requestAnimationFrame(() => { queued = false; compute(); });
 }
 
-// ---------- compute ----------
+// Compute Isochrone Reach
 async function compute() {
   if (!META) return;
-  const token = ++computeToken;   // a newer request makes older ones stop
+  const token = ++computeToken;
   const T = $("minutes").value * 60, speed = +$("speed").value, avoid = $("steps").checked;
   if (META.tiles) {
-    // the farthest anyone can get, plus the distance to the nearest street (up to 500 m)
     const radius = T * Math.max(speed, REF_SPEED) + 500;
     try { await ensureArea(origin.lat, origin.lng, radius, token); }
     catch (err) {
       if (token !== computeToken) return;
       console.error(err);
-      statusEl.className = "err"; statusEl.textContent = "Could not load the map data for this area (" + err.message + ").";
+      statusEl.className = "err"; statusEl.textContent = "Could not load map data (" + err.message + ").";
       return;
     }
     if (token !== computeToken) return;
   }
   if (!G) {
     state = null; $("stats").innerHTML = "";
-    statusEl.className = "err"; statusEl.textContent = "This point is outside the area covered by the data.";
+    statusEl.className = "err"; statusEl.textContent = "This point is outside the coverage area.";
     draw(); return;
   }
-  if (needSnap) {   // the start point of a city can fall in a river or a park: move it to the nearest street
+  if (needSnap) {
     needSnap = false;
     const near = nearestNode(G, grid, origin.lng, origin.lat, 12);
     if (near.node >= 0) { origin = L.latLng(G.lat[near.node], G.lon[near.node]); marker.setLatLng(origin); }
@@ -426,22 +2102,21 @@ async function compute() {
   const n = POIS.pts.length, inAdj = new Uint8Array(n), inRef = new Uint8Array(n);
   const cats = POIS.cats.length, cAdj = new Array(cats).fill(0), cRef = new Array(cats).fill(0);
   let stUsable = 0;
-  const stA = [0, 0, 0, 0], stR = [0, 0, 0, 0];   // reachable stations by wheelchair code
+  const stA = [0, 0, 0, 0], stR = [0, 0, 0, 0];
   for (let i = 0; i < n; i++) {
     const node = POIS.snap.node[i]; if (node < 0) continue;
     const c = POIS.pts[i][2];
     if (dAdj[node] + poiSnap[i] / speed <= T) {
       inAdj[i] = 1; cAdj[c]++;
-      if (c === 6) { stA[POIS.pts[i][3]]++; if (!avoid || POIS.pts[i][3] === 1) stUsable++; }
+      if (c === 10) { stA[POIS.pts[i][3]]++; if (!avoid || POIS.pts[i][3] === 1) stUsable++; }
     }
-    if (dRef[node] + poiSnap[i] / REF_SPEED <= T) { inRef[i] = 1; cRef[c]++; if (c === 6) stR[POIS.pts[i][3]]++; }
+    if (dRef[node] + poiSnap[i] / REF_SPEED <= T) { inRef[i] = 1; cRef[c]++; if (c === 10) stR[POIS.pts[i][3]]++; }
   }
   state = { T, speed, avoid, reachAdj, reachRef, inAdj, dAdj };
   showStats(reachAdj, reachRef, cAdj, cRef, stUsable, stA, stR);
   draw();
 }
 
-// ---------- tiles ----------
 function setPois(cats, pts) {
   const snapped = snapPois(G, grid, pts);
   POIS = { cats, pts, snap: snapped };
@@ -460,7 +2135,6 @@ function loadTile(k) {
   return p;
 }
 
-// make G (the street graph the search runs on) cover everything within radiusM of a point
 async function ensureArea(lat, lng, radiusM, token) {
   const keys = tileKeysFor(META.tiles, tileSet, lat, lng, radiusM).sort();
   const sig = keys.join(",");
@@ -468,13 +2142,13 @@ async function ensureArea(lat, lng, radiusM, token) {
   const missing = keys.filter(k => !tileCache.has(k));
   if (missing.length) {
     statusEl.className = "";
-    statusEl.textContent = "Loading map data (" + missing.length + (missing.length === 1 ? " tile" : " tiles") + ")…";
+    statusEl.textContent = "Loading network data (" + missing.length + (missing.length === 1 ? " tile" : " tiles") + ")…";
     await Promise.all(missing.map(loadTile));
     if (token !== computeToken) return;
   }
-  state = null;   // results refer to the old graph
+  state = null;
   G = keys.length ? mergeGraphs(keys.map(k => tileCache.get(k).graph), META.nodes) : null;
-  if (!G || G.nN === 0) { G = null; grid = null; POIS = null; }   // nothing but amenities (or nothing) here
+  if (!G || G.nN === 0) { G = null; grid = null; POIS = null; }
   else {
     grid = buildGrid(G);
     const pts = [];
@@ -483,33 +2157,286 @@ async function ensureArea(lat, lng, radiusM, token) {
   }
   activeKeys = sig;
   statusEl.textContent = "";
-  if (tileCache.size > 60) {   // keep memory in check: forget tiles that are not in use
+  if (tileCache.size > 60) {
     for (const k of Array.from(tileCache.keys())) { if (!keys.includes(k)) tileCache.delete(k); if (tileCache.size <= 40) break; }
   }
 }
 
+// Render Rich Stats Dashboard
 function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
-  const ST = [[1, "Step-free (wheelchair=yes)"], [2, "Limited"], [3, "Not step-free (tagged no)"], [0, "Not tagged"]];
-  const stRows = ST.map(([code, label]) => `<tr><td><span class="dot st" style="background:${STATION_COLORS[code]}"></span>${label}</td><td>${stA[code]}</td><td>of ${stR[code]}</td></tr>`).join("");
-  const km = m => (m / 1000).toFixed(1), pct = rR.lengthM > 0 ? Math.round((rA.lengthM / rR.lengthM - 1) * 100) : 0;
-  const amen = [0, 1, 2, 3, 4];
-  const rows = amen.map(c => `<tr><td><span class="dot" style="background:${CAT_COLORS[c]}"></span>${POIS.cats[c]}</td><td>${cA[c]}</td><td>of ${cR[c]}</td></tr>`).join("");
-  const totA = amen.reduce((s, c) => s + cA[c], 0), totR = amen.reduce((s, c) => s + cR[c], 0);
-  const present = amen.filter(c => cA[c] > 0).length, perKm = rA.lengthM > 0 ? (totA / (rA.lengthM / 1000)).toFixed(1) : "0";
+  const ST = [
+    [1, "Step-free accessible", "wheelchair=yes"],
+    [2, "Limited access", "partial"],
+    [3, "Not step-free", "stairs"],
+    [0, "Untagged accessibility", "unknown"]
+  ];
+  const km = m => (m / 1000).toFixed(1);
+  const pct = rR.lengthM > 0 ? Math.round((rA.lengthM / rR.lengthM - 1) * 100) : 0;
+  const amen = [0, 1, 2, 3, 4, 7, 8, 9];
+  const totA = amen.reduce((s, c) => s + (cA[c] || 0), 0), totR = amen.reduce((s, c) => s + (cR[c] || 0), 0);
+  const present = amen.filter(c => (cA[c] || 0) > 0).length;
+  const perKm = rA.lengthM > 0 ? (totA / (rA.lengthM / 1000)).toFixed(1) : "0";
+
+  // Extract and group Metro stations by station name
+  const reachedMetros = new Map();
+  const pts = POIS ? POIS.pts : [];
+  const curSpd = state ? state.speed : 1.4;
+  for (let i = 0; i < pts.length; i++) {
+    if (!state || !state.inAdj[i]) continue;
+    const c = pts[i][2];
+    if (c === 6) {
+      const rawName = pts[i][4] || "Metro Station";
+      let stationName = rawName.replace(/\s*Gate\s*[\w\d]+/i, '').replace(/\s*Metro\s*Station/i, '').replace(/\s*Metro/i, '').trim();
+      if (!stationName) stationName = rawName;
+      const node = POIS.snap.node[i];
+      const walkMin = node >= 0 ? Math.max(1, Math.round((state.dAdj[node] + poiSnap[i] / curSpd) / 60)) : 1;
+      const wc = pts[i][3];
+      if (!reachedMetros.has(stationName) || walkMin < reachedMetros.get(stationName).walkMin) {
+        reachedMetros.set(stationName, { walkMin, wc, lat: pts[i][1], lon: pts[i][0] });
+      }
+    }
+  }
+  const metroSorted = Array.from(reachedMetros.entries()).sort((a, b) => a[1].walkMin - b[1].walkMin);
+
+  // Extract and group Indian Railways / Suburban Train stations
+  const reachedTrains = new Map();
+  for (let i = 0; i < pts.length; i++) {
+    if (!state || !state.inAdj[i]) continue;
+    const c = pts[i][2];
+    if (c === 11) {
+      const stationName = pts[i][4] || "Railway Station";
+      const node = POIS.snap.node[i];
+      const walkMin = node >= 0 ? Math.max(1, Math.round((state.dAdj[node] + poiSnap[i] / curSpd) / 60)) : 1;
+      const wc = pts[i][3];
+      if (!reachedTrains.has(stationName) || walkMin < reachedTrains.get(stationName).walkMin) {
+        reachedTrains.set(stationName, { walkMin, wc, lat: pts[i][1], lon: pts[i][0] });
+      }
+    }
+  }
+  const trainSorted = Array.from(reachedTrains.entries()).sort((a, b) => a[1].walkMin - b[1].walkMin);
+
+  // Extract and group Bus Stations, Terminals & Depots
+  const reachedBusStations = new Map();
+  for (let i = 0; i < pts.length; i++) {
+    if (!state || !state.inAdj[i]) continue;
+    const c = pts[i][2];
+    if (c === 12) {
+      const stationName = pts[i][4] || "Bus Station";
+      const node = POIS.snap.node[i];
+      const walkMin = node >= 0 ? Math.max(1, Math.round((state.dAdj[node] + poiSnap[i] / curSpd) / 60)) : 1;
+      const wc = pts[i][3];
+      if (!reachedBusStations.has(stationName) || walkMin < reachedBusStations.get(stationName).walkMin) {
+        reachedBusStations.set(stationName, { walkMin, wc, lat: pts[i][1], lon: pts[i][0] });
+      }
+    }
+  }
+  const busSorted = Array.from(reachedBusStations.entries()).sort((a, b) => a[1].walkMin - b[1].walkMin);
+
+  const rows = amen.map(c => {
+    const cur = cA[c] || 0, ref = cR[c] || 0;
+    const pctVal = ref > 0 ? Math.min(100, Math.round((cur / ref) * 100)) : (cur > 0 ? 100 : 0);
+    const isActive = activeCatFilter.has(c);
+    const catName = (POIS.cats && POIS.cats[c]) || `Category ${c}`;
+    return `
+      <div class="stat-amenity-row cat-row-${c} ${isActive ? '' : 'filter-dimmed'}" onclick="toggleCatFilter(${c})" title="Click to filter on map" style="cursor:pointer">
+        <div class="stat-amenity-meta">
+          <div class="stat-amenity-name">
+            <span class="dot" style="background:${CAT_COLORS[c]}"></span>
+            <span>${catName}</span>
+          </div>
+          <div class="stat-amenity-nums">
+            <span class="num-cur">${cur}</span>
+            <span class="num-ref">/ ${ref}</span>
+          </div>
+        </div>
+        <div class="stat-amenity-bar">
+          <div class="stat-amenity-fill" style="width:${pctVal}%;background:${CAT_COLORS[c]}"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const stRows = ST.map(([code, label]) => `
+    <div class="station-row">
+      <div class="station-meta">
+        <span class="dot st" style="background:${STATION_COLORS[code]}"></span>
+        <span>${label}</span>
+      </div>
+      <div class="station-nums">
+        <b>${stA[code]}</b> <span class="ref">/ ${stR[code]}</span>
+      </div>
+    </div>
+  `).join("");
+
   $("stats").innerHTML = `
-    <div><b>${km(rA.lengthM)} km</b> of streets reachable (${pct >= 0 ? "+" : ""}${pct}% vs. reference ${km(rR.lengthM)} km)</div>
-    <table>${rows}<tr><td><b>All amenities</b></td><td><b>${totA}</b></td><td>of ${totR}</td></tr></table>
-    <div class="note">${present} of 5 categories present, ${perKm} amenities per km of reachable street. Counts show your settings, then the reference.</div>
-    <div style="margin-top:8px">Benches: <b>${cA[5]}</b> of ${cR[5]}</div>
-    <div style="margin-top:10px"><b>Stations within reach</b>: ${cA[6]} of ${cR[6]}</div>
-    <table>${stRows}</table>
-    <div class="note">${state.avoid ? `With stair avoidance on, only step-free stations count as usable (${stUsable}); the others are shown faded.` : "Tick stair avoidance to fade the stations that are not usable."} Step-free status comes from OpenStreetMap tags; many stops are simply untagged.</div>`;
+    <div class="stats-card">
+      <div class="stats-hero">
+        <div class="stats-hero-main">
+          <div class="stats-hero-num">${km(rA.lengthM)} <small>km</small></div>
+          <div class="stats-hero-label">Reachable street network</div>
+        </div>
+        <div class="stats-hero-badge ${pct >= 0 ? 'badge-pos' : 'badge-neg'}">
+          ${pct >= 0 ? '+' : ''}${pct}% vs 1.4 m/s
+        </div>
+      </div>
+
+      <!-- Dedicated Kolkata Metro Reach Card -->
+      <div class="metro-reach-card">
+        <div class="metro-reach-header">
+          <div class="metro-title-wrap">
+            <span class="metro-icon-badge">Ⓜ</span>
+            <div>
+              <div class="metro-main-title">Kolkata Metro Connectivity</div>
+              <div class="metro-sub-title">
+                ${metroSorted.length > 0 ? `<b>${metroSorted.length}</b> station${metroSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No metro stations within ${$("minutes").value} min`}
+              </div>
+            </div>
+          </div>
+          <span class="metro-status-pill ${metroSorted.length > 0 ? 'm-active' : 'm-idle'}">
+            ${metroSorted.length > 0 ? metroSorted.length + ' in reach' : 'Out of range'}
+          </span>
+        </div>
+        ${metroSorted.length > 0 ? `
+          <div class="metro-station-list">
+            ${metroSorted.slice(0, 8).map(([name, data]) => `
+              <div class="metro-item-pill" onclick="flyToMetro(${data.lat}, ${data.lon}, '${name}')" title="Center map on ${name} Metro">
+                <div class="m-item-left">
+                  <span class="m-glyph">Ⓜ</span>
+                  <span class="m-name">${name}</span>
+                </div>
+                <div class="m-item-right">
+                  <span class="m-time-badge">${data.walkMin} min walk</span>
+                  ${data.wc === 1 ? '<span class="m-wc-tag" title="Step-free accessible">♿</span>' : ''}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="metro-empty-hint">
+            <span>🚶 No Metro within ${$("minutes").value} min. Increase time or walk speed to connect with Metro corridors.</span>
+          </div>
+        `}
+      </div>
+
+      <!-- Dedicated Indian Railways & Suburban Rail Reach Card -->
+      <div class="train-reach-card">
+        <div class="train-reach-header">
+          <div class="train-title-wrap">
+            <span class="train-icon-badge">🚆</span>
+            <div>
+              <div class="train-main-title">Suburban Railway (ER &amp; SER)</div>
+              <div class="train-sub-title">
+                ${trainSorted.length > 0 ? `<b>${trainSorted.length}</b> station${trainSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No railway stations within ${$("minutes").value} min walk`}
+              </div>
+            </div>
+          </div>
+          <span class="train-status-pill ${trainSorted.length > 0 ? 't-active' : 't-idle'}">
+            ${trainSorted.length > 0 ? trainSorted.length + ' in reach' : 'Out of range'}
+          </span>
+        </div>
+        ${trainSorted.length > 0 ? `
+          <div class="train-station-list">
+            ${trainSorted.slice(0, 8).map(([name, data]) => `
+              <div class="train-item-pill" onclick="flyToTrain(${data.lat}, ${data.lon}, '${name}')" title="Center map on ${name}">
+                <div class="t-item-left">
+                  <span class="t-glyph">🚆</span>
+                  <span class="t-name">${name}</span>
+                </div>
+                <div class="t-item-right">
+                  <span class="t-time-badge">${data.walkMin} min walk</span>
+                  ${data.wc === 1 ? '<span class="t-wc-tag" title="Step-free accessible">♿</span>' : ''}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="train-empty-hint">
+            <span>🚶 No railway stations within ${$("minutes").value} min walk. Adjust time budget or speed to find train hubs.</span>
+          </div>
+        `}
+      </div>
+
+      <!-- Dedicated Bus Terminals & Major Stands Reach Card -->
+      <div class="bus-reach-card">
+        <div class="bus-reach-header">
+          <div class="bus-title-wrap">
+            <span class="bus-icon-badge">🚌</span>
+            <div>
+              <div class="bus-main-title">Bus Terminals &amp; Major Stands</div>
+              <div class="bus-sub-title">
+                ${busSorted.length > 0 ? `<b>${busSorted.length}</b> bus terminal${busSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No bus terminals within ${$("minutes").value} min walk`}
+              </div>
+            </div>
+          </div>
+          <span class="bus-status-pill ${busSorted.length > 0 ? 'b-active' : 'b-idle'}">
+            ${busSorted.length > 0 ? busSorted.length + ' in reach' : 'Out of range'}
+          </span>
+        </div>
+        ${busSorted.length > 0 ? `
+          <div class="bus-station-list">
+            ${busSorted.slice(0, 8).map(([name, data]) => `
+              <div class="bus-item-pill" onclick="flyToBusStation(${data.lat}, ${data.lon}, '${name}')" title="Center map on ${name}">
+                <div class="b-item-left">
+                  <span class="b-glyph">🚌</span>
+                  <span class="b-name">${name}</span>
+                </div>
+                <div class="b-item-right">
+                  <span class="b-time-badge">${data.walkMin} min walk</span>
+                  ${data.wc === 1 ? '<span class="b-wc-tag" title="Step-free accessible">♿</span>' : ''}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <div class="bus-empty-hint">
+            <span>🚶 No bus terminals within ${$("minutes").value} min walk. Adjust time budget or speed.</span>
+          </div>
+        `}
+      </div>
+
+      <div class="stats-micro-grid">
+        <div class="stats-micro-box">
+          <div class="micro-val">${totA} <small>/ ${totR}</small></div>
+          <div class="micro-lbl">Total Amenities</div>
+        </div>
+        <div class="stats-micro-box">
+          <div class="micro-val">${metroSorted.length} <small>metro</small></div>
+          <div class="micro-lbl">Metro In Reach</div>
+        </div>
+        <div class="stats-micro-box">
+          <div class="micro-val">${trainSorted.length} <small>train</small></div>
+          <div class="micro-lbl">Rail In Reach</div>
+        </div>
+        <div class="stats-micro-box">
+          <div class="micro-val">${busSorted.length} <small>stands</small></div>
+          <div class="micro-lbl">Bus Terminals</div>
+        </div>
+      </div>
+
+      <div class="stats-section-title">
+        <span>Amenity Categories</span>
+        <span class="badge-tag">Click to toggle on map</span>
+      </div>
+      <div class="stat-amenity-list">
+        ${rows}
+      </div>
+
+      <div class="stats-section-title" style="margin-top: 14px;">
+        <span>Bus, Tram &amp; Hooghly Ferry Ghats</span>
+        <span class="badge-tag">${cA[10] || 0} of ${cR[10] || 0} reached</span>
+      </div>
+      <div class="station-list">
+        ${stRows}
+      </div>
+      ${state.avoid 
+        ? `<div class="stats-subnote"><span class="icon-sub">♿</span> Step-free mode active: <b>${stUsable}</b> accessible transit stops usable; non-accessible stops are dimmed.</div>` 
+        : `<div class="stats-subnote">💡 Tip: Enable "Avoid stairs" in the controls to evaluate step-free barrier accessibility.</div>`}
+    </div>
+  `;
 }
 
-// ---------- drawing ----------
-// Basemap of last resort: every street in view as a faint line (zoomed out too far, there are too many to draw).
 function drawStreetBase(ctx, X, Y, S, tl, size) {
-  const x0 = tl.x / S, x1 = (tl.x + size.x) / S, y0 = tl.y / S, y1 = (tl.y + size.y) / S;   // view edges in mercator units
+  const x0 = tl.x / S, x1 = (tl.x + size.x) / S, y0 = tl.y / S, y1 = (tl.y + size.y) / S;
   ctx.beginPath(); ctx.strokeStyle = "rgba(110,110,110,0.35)"; ctx.lineWidth = 1;
   ctx.lineCap = "round"; ctx.lineJoin = "round";
   for (let e = 0; e < G.nE; e++) {
@@ -530,7 +2457,7 @@ function draw() {
   const ctx = canvas.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size.x, size.y);
-  $("rampHint").style.display = "none";   // shown again below only if orange (ramped) steps are drawn
+  $("rampHint").style.display = "none";
   if (!G) return;
 
   const z = map.getZoom(), S = 256 * Math.pow(2, z), tl = map.getPixelBounds().min;
@@ -546,12 +2473,12 @@ function draw() {
     ctx.moveTo(X(pts[0]), Y(pts[1]));
     for (let i = 2; i < pts.length; i += 2) ctx.lineTo(X(pts[i]), Y(pts[i + 1]));
   };
-  // reference reach in grey, only where the current settings do not reach
+
   const adjFrac = new Map(state.reachAdj.items.map(it => [it.e, it.frac]));
-  ctx.beginPath(); ctx.strokeStyle = "rgba(90,90,90,0.5)"; ctx.lineWidth = Math.max(1, width * 0.7);
+  ctx.beginPath(); ctx.strokeStyle = "rgba(90,90,90,0.45)"; ctx.lineWidth = Math.max(1, width * 0.7);
   for (const it of state.reachRef.items) if ((adjFrac.get(it.e) || 0) < it.frac - 1e-6) trace(it);
   ctx.stroke();
-  // current reach, coloured by walking time
+
   const bins = Array.from({ length: NB }, () => []);
   for (const it of state.reachAdj.items) bins[Math.min(NB - 1, Math.floor(it.tt * NB))].push(it);
   ctx.lineWidth = width;
@@ -562,16 +2489,15 @@ function draw() {
     ctx.stroke();
   });
 
-  // flights of steps next to the area you can reach, so the places where avoiding stairs cuts a route can be seen
   if ($("showSteps").checked && z >= 13) {
-    const x0 = tl.x / S, x1 = (tl.x + size.x) / S, y0 = tl.y / S, y1 = (tl.y + size.y) / S;   // view edges in mercator units
+    const x0 = tl.x / S, x1 = (tl.x + size.x) / S, y0 = tl.y / S, y1 = (tl.y + size.y) / S;
     const strokeSteps = (flagBit, color) => {
       let drawn = 0;
       ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = Math.max(2.5, width + 1);
       for (let e = 0; e < G.nE; e++) {
         if (!(G.eflag[e] & flagBit)) continue;
         const u = G.eu[e], v = G.ev[e];
-        if (!(state.dAdj[u] <= state.T || state.dAdj[v] <= state.T)) continue;   // only steps that touch the area you can reach
+        if (!(state.dAdj[u] <= state.T || state.dAdj[v] <= state.T)) continue;
         const ux = G.mx[u], uy = G.my[u], vx = G.mx[v], vy = G.my[v];
         if ((ux < x0 && vx < x0) || (ux > x1 && vx > x1) || (uy < y0 && vy < y0) || (uy > y1 && vy > y1)) continue;
         const pth = edgePath(G, e, false);
@@ -582,42 +2508,120 @@ function draw() {
       ctx.stroke();
       return drawn;
     };
-    strokeSteps(1, "#c1272d");   // steps that block a route without stairs
-    // steps with a wheelchair ramp (OpenStreetMap ramp:wheelchair=yes): passable. Drawn last, so on top of the red ones.
+    strokeSteps(1, "#c1272d");
     if (strokeSteps(2, "#e8a13a") > 0) $("rampHint").style.display = "";
   }
   const showAm = $("showAm").checked, showSt = $("showSt").checked, showBn = $("showBn").checked;
+  const showMetro = $("showMetro") ? $("showMetro").checked : true;
+  const showRail = $("showRail") ? $("showRail").checked : true;
+  const showBusStation = $("showBusStation") ? $("showBusStation").checked : true;
   const pts = POIS.pts;
   for (let i = 0; i < pts.length; i++) {
     if (!state.inAdj[i]) continue;
     const c = pts[i][2];
-    if (c === 6) {
+    if (c === 12) {
+      if (!showBusStation) continue;
+      const wc = pts[i][3], usable = !state.avoid || wc === 1;
+      const px = X(poiMx[i]), py = Y(poiMy[i]);
+      ctx.globalAlpha = usable ? 1 : 0.35;
+      
+      // Outer Bus Station Marker: Emerald / Transit Teal
+      ctx.beginPath(); ctx.arc(px, py, 7.5, 0, 6.2832);
+      ctx.fillStyle = "#0d9488"; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "#ffffff"; ctx.stroke();
+
+      // Inner glowing mint core
+      ctx.beginPath(); ctx.arc(px, py, 3.2, 0, 6.2832);
+      ctx.fillStyle = "#6ee7b7"; ctx.fill();
+
+      // Bus Station 'B' glyph when zoomed in
+      if (z >= 13) {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 8px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("B", px, py + 0.6);
+      }
+      ctx.globalAlpha = 1;
+    } else if (c === 11) {
+      if (!showRail) continue;
+      const wc = pts[i][3], usable = !state.avoid || wc === 1;
+      const px = X(poiMx[i]), py = Y(poiMy[i]);
+      ctx.globalAlpha = usable ? 1 : 0.35;
+      
+      // Outer Railway Station Marker (Indian Railways Crimson)
+      ctx.beginPath(); ctx.arc(px, py, 8, 0, 6.2832);
+      ctx.fillStyle = "#dc2626"; ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = "#ffffff"; ctx.stroke();
+
+      // Inner Railway core (Warm Railway Gold)
+      ctx.beginPath(); ctx.arc(px, py, 3.8, 0, 6.2832);
+      ctx.fillStyle = "#fef08a"; ctx.fill();
+
+      // Railway 'R' glyph when zoomed in
+      if (z >= 13) {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 8.5px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("R", px, py + 0.6);
+      }
+      ctx.globalAlpha = 1;
+    } else if (c === 6) {
+      if (!showMetro) continue;
+      const wc = pts[i][3], usable = !state.avoid || wc === 1;
+      const px = X(poiMx[i]), py = Y(poiMy[i]);
+      ctx.globalAlpha = usable ? 1 : 0.35;
+      
+      // Outer Metro circle: Indian Railways / Kolkata Metro Blue
+      ctx.beginPath(); ctx.arc(px, py, 7.5, 0, 6.2832);
+      ctx.fillStyle = "#1e40af"; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "#ffffff"; ctx.stroke();
+
+      // Inner glowing core
+      ctx.beginPath(); ctx.arc(px, py, 3.2, 0, 6.2832);
+      ctx.fillStyle = "#38bdf8"; ctx.fill();
+
+      // Metro 'M' glyph when zoomed in
+      if (z >= 13) {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 8px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("M", px, py + 0.6);
+      }
+      ctx.globalAlpha = 1;
+    } else if (c === 10) {
       if (!showSt) continue;
       const wc = pts[i][3], usable = !state.avoid || wc === 1;
       ctx.globalAlpha = usable ? 1 : 0.35;
-      ctx.beginPath(); ctx.arc(X(poiMx[i]), Y(poiMy[i]), 7, 0, 6.2832);
+      ctx.beginPath(); ctx.arc(X(poiMx[i]), Y(poiMy[i]), 5.5, 0, 6.2832);
       ctx.fillStyle = STATION_COLORS[wc]; ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = "#15171a"; ctx.stroke();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = "#ffffff"; ctx.stroke();
       ctx.globalAlpha = 1;
-    } else if (c === 5 ? showBn : showAm) {
-      ctx.beginPath(); ctx.arc(X(poiMx[i]), Y(poiMy[i]), c === 5 ? 2.2 : 3, 0, 6.2832);
-      ctx.fillStyle = CAT_COLORS[c]; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
+    } else if (c === 5) {
+      if (!showBn) continue;
+      ctx.beginPath(); ctx.arc(X(poiMx[i]), Y(poiMy[i]), 2.5, 0, 6.2832);
+      ctx.fillStyle = CAT_COLORS[5]; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
+    } else if (showAm && activeCatFilter.has(c)) {
+      ctx.beginPath(); ctx.arc(X(poiMx[i]), Y(poiMy[i]), 3.5, 0, 6.2832);
+      ctx.fillStyle = CAT_COLORS[c] || "#64748b"; ctx.globalAlpha = 0.92; ctx.fill(); ctx.globalAlpha = 1;
     }
   }
 }
 
-// ---------- shareable link: the settings live in the address after the # ----------
+// URL Hash
 let hashTimer;
 function writeHash() {
   clearTimeout(hashTimer);
   hashTimer = setTimeout(() => {
     const q = new URLSearchParams({ city: CITY, lat: origin.lat.toFixed(5), lng: origin.lng.toFixed(5), min: $("minutes").value,
       spd: $("speed").value, st: $("steps").checked ? 1 : 0, z: map.getZoom() });
-    try { history.replaceState(null, "", "#" + q.toString()); } catch (e) { /* some browsers limit this */ }
+    try { history.replaceState(null, "", "#" + q.toString()); } catch (e) { }
   }, 300);
 }
+
 function applyHash(meta, fresh) {
-  // fresh = the city was just changed in the menu: the position in the address belongs to the old city
   const q = fresh ? new URLSearchParams() : new URLSearchParams(location.hash.slice(1));
   const num = (k, lo, hi) => { const v = parseFloat(q.get(k)); return Number.isFinite(v) && v >= lo && v <= hi ? v : null; };
   const [minLon, minLat, maxLon, maxLat] = meta.bbox;
@@ -630,34 +2634,177 @@ function applyHash(meta, fresh) {
   const z = num("z", 10, 19);
   return z !== null ? z : 14;
 }
+
+// Toast System
+let toastTimer;
+function showToast(msg, icon = "✨") {
+  clearTimeout(toastTimer);
+  const toast = $("toast");
+  $("toastIcon").textContent = icon;
+  $("toastMsg").textContent = msg;
+  toast.classList.add("show");
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+}
+
+// Teleport landmark
+function teleportTo(lat, lng, name) {
+  origin = L.latLng(lat, lng);
+  marker.setLatLng(origin);
+  map.flyTo(origin, 15, { duration: 1.2 });
+  schedule();
+  showToast(`Teleported to ${name}`, "📍");
+}
+
+// Copy link
 $("copyLink").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText(location.href); $("copyMsg").textContent = "Link copied."; }
-  catch (e) { $("copyMsg").textContent = "Copy the address from your browser's address bar."; }
+  try {
+    await navigator.clipboard.writeText(location.href);
+    $("copyMsg").textContent = "Link copied to clipboard!";
+    showToast("Share link copied to clipboard!", "🔗");
+  } catch (e) {
+    $("copyMsg").textContent = "Copy the URL directly from your browser bar.";
+  }
   setTimeout(() => { $("copyMsg").textContent = ""; }, 3000);
 });
 
-// ---------- events ----------
+// Event Listeners for inputs
 ["minutes", "speed"].forEach(id => $(id).addEventListener("input", schedule));
 $("steps").addEventListener("change", schedule);
-["showAm", "showSt", "showBn", "showSteps"].forEach(id => $(id).addEventListener("change", draw));
+["showAm", "showSt", "showBn", "showSteps", "showMetro", "showRail", "showBusStation"].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener("change", draw);
+});
 map.on("click", e => { origin = e.latlng; marker.setLatLng(origin); schedule(); });
 marker.on("drag", () => { origin = marker.getLatLng(); schedule(); });
 map.on("moveend resize zoomend", draw);
 
-// ---------- load ----------
+// Time Presets
+document.querySelectorAll("#timePresets .preset-pill").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $("minutes").value = btn.getAttribute("data-min");
+    schedule();
+  });
+});
+
+// Speed Presets
+document.querySelectorAll("#speedPresets .preset-pill").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $("speed").value = btn.getAttribute("data-spd");
+    schedule();
+  });
+});
+
+// Floating Map Buttons
+$("zoomInBtn").addEventListener("click", () => map.zoomIn());
+$("zoomOutBtn").addEventListener("click", () => map.zoomOut());
+$("resetViewBtn").addEventListener("click", () => {
+  if (META && META.start) {
+    origin = L.latLng(META.start[0], META.start[1]);
+    marker.setLatLng(origin);
+    map.flyTo(origin, 14, { duration: 1 });
+    schedule();
+    showToast("View reset to Kolkata centre", "🎯");
+  }
+});
+
+// Geolocation
+$("locateBtn").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    showToast("Geolocation is not supported by your browser", "⚠️");
+    return;
+  }
+  showToast("Locating your current coordinates...", "📡");
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      if (META && META.bbox) {
+        const [minLon, minLat, maxLon, maxLat] = META.bbox;
+        if (lat < minLat - 0.1 || lat > maxLat + 0.1 || lng < minLon - 0.1 || lng > maxLon + 0.1) {
+          showToast("Your location is outside Kolkata data coverage", "⚠️");
+          return;
+        }
+      }
+      origin = L.latLng(lat, lng);
+      marker.setLatLng(origin);
+      map.flyTo(origin, 15, { duration: 1.2 });
+      schedule();
+      showToast("Found your location!", "📍");
+    },
+    err => {
+      showToast("Could not get location: " + err.message, "⚠️");
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+});
+
+// Sidebar Collapse / Expand
+const panel = $("panel"), openBtn = $("openPanelBtn"), closeBtn = $("closePanelBtn");
+closeBtn.addEventListener("click", () => {
+  panel.classList.add("collapsed");
+  openBtn.style.display = "flex";
+  map.invalidateSize();
+});
+openBtn.addEventListener("click", () => {
+  panel.classList.remove("collapsed");
+  openBtn.style.display = "none";
+  map.invalidateSize();
+});
+
+// Dark Mode Toggle
+const themeBtn = $("themeToggleBtn");
+const savedTheme = localStorage.getItem("15min_theme");
+if (savedTheme === "dark") {
+  document.body.classList.add("dark-theme");
+  updateThemeIcon(true);
+}
+themeBtn.addEventListener("click", () => {
+  const isDark = document.body.classList.toggle("dark-theme");
+  localStorage.setItem("15min_theme", isDark ? "dark" : "light");
+  updateThemeIcon(isDark);
+  showToast(isDark ? "Dark theme enabled" : "Light theme enabled", isDark ? "🌙" : "☀️");
+});
+function updateThemeIcon(isDark) {
+  $("themeIcon").innerHTML = isDark
+    ? `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`
+    : `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+}
+
+// Section navigation highlighting
+const navChips = [
+  { chip: $("chipControls"), target: $("sec-controls") },
+  { chip: $("chipAnalytics"), target: $("sec-analytics") },
+  { chip: $("chipLayers"), target: $("sec-layers") }
+];
+navChips.forEach(({ chip, target }) => {
+  chip.addEventListener("click", (e) => {
+    e.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    navChips.forEach(n => n.chip.classList.toggle("active", n.chip === chip));
+  });
+});
+
+// Load Data
 async function loadCities() {
-  try { const r = await fetch(DATA_ROOT + "cities.json"); if (r.ok) CITIES = (await r.json()).cities || []; } catch (e) { /* no list: single city */ }
+  try {
+    const r = await fetch(DATA_ROOT + "cities.json");
+    if (r.ok) CITIES = (await r.json()).cities || [];
+  } catch (e) { }
   if (!CITIES.length) CITIES = [{ id: "kolkata", name: "Kolkata" }];
   if (CITIES.length > 1) {
     const sel = $("city");
-    for (const c of CITIES) { const o = document.createElement("option"); o.value = c.id; o.textContent = c.name; sel.appendChild(o); }
+    for (const c of CITIES) {
+      const o = document.createElement("option");
+      o.value = c.id;
+      o.textContent = c.name;
+      sel.appendChild(o);
+    }
     $("cityBox").style.display = "";
   }
 }
 
 async function loadCity(id, fresh) {
   CITY = id; DATA_DIR = DATA_ROOT + id + "/";
-  computeToken++;   // stop whatever was still running for the previous city
+  computeToken++;
   META = null; G = null; grid = null; POIS = null; state = null; activeKeys = ""; tileSet = null;
   tileCache = new Map(); tileInflight = new Map();
   $("stats").innerHTML = "";
@@ -665,9 +2812,9 @@ async function loadCity(id, fresh) {
   draw();
   try {
     const meta = await fetch(DATA_DIR + "meta.json").then(r => { if (!r.ok) throw new Error("meta.json not found"); return r.json(); });
-    if (id !== CITY) return;   // the menu was changed again while loading
+    if (id !== CITY) return;
     if (meta.tiles) tileSet = new Set(meta.tiles.list);
-    else {   // a whole city in one file
+    else {
       const [buf, pois] = await Promise.all([
         fetch(DATA_DIR + "graph.bin").then(r => { if (!r.ok) throw new Error("graph.bin not found"); return r.arrayBuffer(); }),
         fetch(DATA_DIR + "pois.json").then(r => r.json())
@@ -691,13 +2838,13 @@ async function loadCity(id, fresh) {
   } catch (err) {
     console.error(err);
     statusEl.className = "err";
-    statusEl.textContent = "Could not load the data for this city (" + err.message + "). Run export_city.py first and open this page through a web server, not directly from disk.";
+    statusEl.textContent = "Could not load data (" + err.message + ").";
   }
 }
 
 $("city").addEventListener("change", () => {
   const id = $("city").value;
-  try { history.replaceState(null, "", "#city=" + encodeURIComponent(id)); } catch (e) { /* some browsers limit this */ }
+  try { history.replaceState(null, "", "#city=" + encodeURIComponent(id)); } catch (e) { }
   loadCity(id, true);
 });
 

@@ -1,0 +1,660 @@
+[
+  {
+    "name": "14 No Bus Stop",
+    "lat": 22.50229,
+    "lon": 88.31834,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "14 No Bus Stop",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "15 No Bus Stand (S30)",
+    "lat": 22.59265,
+    "lon": 88.38875,
+    "wc": 1,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "description": "Route Number S-30, S-30A, ST7",
+      "name": "15 No Bus Stand (S30)",
+      "operator": "WBTC",
+      "public_transport": "station",
+      "wheelchair": "yes"
+    }
+  },
+  {
+    "name": "CSTC Bus Terminal",
+    "lat": 22.48146,
+    "lon": 88.34642,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "name": "CSTC Bus Terminal"
+    }
+  },
+  {
+    "name": "Belur Math Bus stop",
+    "lat": 22.6314,
+    "lon": 88.35206,
+    "wc": 1,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Belur Math Bus stop",
+      "public_transport": "station",
+      "wheelchair": "yes"
+    }
+  },
+  {
+    "name": "45 BUS STAND",
+    "lat": 22.47125,
+    "lon": 88.37725,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "45 BUS STAND",
+      "network": "45",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Gujarat Co-operative Milk Marketing Federation",
+    "lat": 22.57097,
+    "lon": 88.4127,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Gujarat Co-operative Milk Marketing Federation",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Nabanna Bus Stand",
+    "lat": 22.56596,
+    "lon": 88.31315,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Nabanna Bus Stand",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Parnasree Bus Stand",
+    "lat": 22.5094,
+    "lon": 88.30653,
+    "wc": 2,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Parnasree Bus Stand",
+      "operator": "WBTC",
+      "public_transport": "station",
+      "wheelchair": "limited"
+    }
+  },
+  {
+    "name": "Kolkata Station Bus Terminal",
+    "lat": 22.60151,
+    "lon": 88.38221,
+    "wc": 0,
+    "tags": {
+      "addr:city": "Kolkata",
+      "addr:postcode": "700004",
+      "addr:street": "Near Railway Station, Station Rd",
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Kolkata Station Bus Terminal",
+      "name:bn": "\u0995\u09b2\u0995\u09be\u09a4\u09be \u09b8\u09cd\u099f\u09c7\u09b6\u09a8 \u09ac\u09be\u09b8 \u099f\u09be\u09b0\u09cd\u09ae\u09bf\u09a8\u09be\u09b2",
+      "name:hi": "\u0915\u094b\u0932\u0915\u093e\u0924\u093e \u0938\u094d\u091f\u0947\u0936\u0928 \u092c\u0938 \u091f\u0930\u094d\u092e\u093f\u0928\u0932",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "B.B.D. Bag",
+    "lat": 22.5716,
+    "lon": 88.35026,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "B.B.D. Bag",
+      "name:en": "B.B.D. Bag",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Howrah Bus Station",
+    "lat": 22.58618,
+    "lon": 88.34298,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "check_date": "2024-07-15",
+      "name": "Howrah Bus Station",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Esplanade Bus Terminus",
+    "lat": 22.56482,
+    "lon": 88.35145,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Esplanade",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Park Circus - Chittaranjan Hospital",
+    "lat": 22.54516,
+    "lon": 88.37037,
+    "wc": 3,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Park Circus - Chittaranjan Hospital",
+      "public_transport": "station",
+      "wheelchair": "no"
+    }
+  },
+  {
+    "name": "Airport Bus Stand (lines VS1, VS2, AC37A, AC39, AC43, AC49A)",
+    "lat": 22.64476,
+    "lon": 88.43873,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Airport Bus Stand (lines VS1, VS2, AC37A, AC39, AC43, AC49A)",
+      "name:en": "Airport Bus Stand (lines VS1, VS2, AC37A, AC39, AC43, AC49A)",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Babughat bus stand",
+    "lat": 22.56512,
+    "lon": 88.33978,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Babughat bus stand",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "4B,Bus Stand",
+    "lat": 22.61891,
+    "lon": 88.37318,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "check_date": "2023-10-05",
+      "highway": "bus_stop",
+      "name": "4B,Bus Stand",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Santoshpur BBD BAG mini bus stopage",
+    "lat": 22.4887,
+    "lon": 88.41625,
+    "wc": 0,
+    "tags": {
+      "addr:street": "Daspara Bazar",
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Santoshpur BBD BAG mini bus stopage",
+      "network": "Santoshpur - BBD-BAG Mini Bus",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Paikpara",
+    "lat": 22.61605,
+    "lon": 88.3791,
+    "wc": 0,
+    "tags": {
+      "addr:street": "SH1",
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Paikpara",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "12B Bus Station (Matiaburj to Dharamtalla)",
+    "lat": 22.54851,
+    "lon": 88.28786,
+    "wc": 0,
+    "tags": {
+      "addr:postcode": "700024",
+      "addr:street": "Garden Reach Road",
+      "amenity": "bus_station",
+      "name": "12B Bus Station (Matiaburj to Dharamtalla)",
+      "opening_hours": "Mo-Su 06:00-20:30"
+    }
+  },
+  {
+    "name": "Balaka Bus Terminus",
+    "lat": 22.57431,
+    "lon": 88.45586,
+    "wc": 0,
+    "tags": {
+      "addr:city": "Kolkata",
+      "addr:housenumber": "Balaka Bus Terminus, New Town, Action Area 1",
+      "addr:postcode": "700156",
+      "amenity": "bus_station",
+      "bus": "yes",
+      "internet_access": "no",
+      "name": "Balaka Bus Terminus",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "S-3B Bus Terminus",
+    "lat": 22.58099,
+    "lon": 88.39119,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "S-3B Bus Terminus",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Nagerbazar Bus Station",
+    "lat": 22.62306,
+    "lon": 88.41409,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Nagerbazar Bus Station",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Jadavpur 8b Bus Terminal",
+    "lat": 22.49566,
+    "lon": 88.37056,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "check_date": "2023-10-30",
+      "name": "Jadavpur 8b Bus Terminal",
+      "public_transport": "station",
+      "source": "local knowledge"
+    }
+  },
+  {
+    "name": "West Bengal Transport Corporation - Belgachia Deopt",
+    "lat": 22.60558,
+    "lon": 88.38466,
+    "wc": 0,
+    "tags": {
+      "addr:postcode": "700037",
+      "addr:street": "Radha Gobinda Kar Road",
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "West Bengal Transport Corporation - Belgachia Deopt",
+      "name:en": "West Bengal Transport Corporation - Belgachia Depot",
+      "opening_hours": "Mo-Su 06:00-12:00",
+      "operator": "WBTC",
+      "public_transport": "station",
+      "website": "https://transport.wb.gov.in/"
+    }
+  },
+  {
+    "name": "Calcutta State Transport Corporation Depot",
+    "lat": 22.50681,
+    "lon": 88.35408,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "name": "Calcutta State Transport Corporation Depot"
+    }
+  },
+  {
+    "name": "Tollygunge Tram Depot",
+    "lat": 22.49398,
+    "lon": 88.34617,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "name": "Tollygunge Tram Depot"
+    }
+  },
+  {
+    "name": "42A BUS STAND",
+    "lat": 22.53075,
+    "lon": 88.38945,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "42A BUS STAND",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Howrah CSTC",
+    "lat": 22.57735,
+    "lon": 88.33424,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Howrah CSTC",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Rajabazar Tram Depot",
+    "lat": 22.57421,
+    "lon": 88.3738,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "area": "yes",
+      "bus": "yes",
+      "name": "Rajabazar Tram Depot",
+      "operator": "CTC",
+      "public_transport": "station",
+      "tram": "yes"
+    }
+  },
+  {
+    "name": "Salt Lake Bus Depot",
+    "lat": 22.58008,
+    "lon": 88.42958,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Salt Lake Bus Depot",
+      "operator": "West Bengal State Transport Corporation",
+      "public_transport": "station",
+      "wikidata": "Q7984450",
+      "wikipedia": "en:West Bengal Transport Corporation"
+    }
+  },
+  {
+    "name": "47/1 BUS DEPOT (SALTLAKE - TOLLYGUNJ METRO)",
+    "lat": 22.57842,
+    "lon": 88.41871,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "47/1 BUS DEPOT (SALTLAKE - TOLLYGUNJ METRO)",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Karunamoyee International Coach Terminus",
+    "lat": 22.58561,
+    "lon": 88.42102,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Karunamoyee International Coach Terminus",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Babu Ghat",
+    "lat": 22.56544,
+    "lon": 88.33968,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Babu Ghat",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "44 Bus Stand",
+    "lat": 22.61081,
+    "lon": 88.42853,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "44 Bus Stand",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "New Town Bus Depot",
+    "lat": 22.58271,
+    "lon": 88.4538,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "New Town Bus Depot",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "206 Bus Terminal",
+    "lat": 22.5919,
+    "lon": 88.42793,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "206 Bus Terminal\u200e",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "WBTC Bus Terminal",
+    "lat": 22.47407,
+    "lon": 88.31081,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "WBTC Bus Terminal",
+      "operator": "WBTC",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "3A bus stand",
+    "lat": 22.45673,
+    "lon": 88.30458,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "building": "yes",
+      "bus": "yes",
+      "name": "3A bus stand",
+      "network": "3A",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Anandapur Bus Stand",
+    "lat": 22.51208,
+    "lon": 88.40858,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "building": "detached",
+      "bus": "yes",
+      "internet_access": "no",
+      "name": "Anandapur Bus Stand",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Garia 6 no. bus terminus",
+    "lat": 22.46514,
+    "lon": 88.37724,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "building": "yes",
+      "bus": "yes",
+      "internet_access": "no",
+      "layer": "-1",
+      "name": "Garia 6 no. bus terminus",
+      "operator": "WBTC",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "30D Bus Stop",
+    "lat": 22.63672,
+    "lon": 88.41269,
+    "wc": 0,
+    "tags": {
+      "addr:postcode": "700028",
+      "amenity": "bus_station",
+      "building": "no",
+      "bus": "yes",
+      "name": "30D Bus Stop",
+      "network": "30D",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Sarsuna Bus Stand",
+    "lat": 22.48032,
+    "lon": 88.2946,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "building": "garage",
+      "bus": "yes",
+      "name": "Sarsuna Bus Stand",
+      "name:en": "Sarsuna Bus Stand",
+      "operator": "WBTC",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Nabadiganta Bus Terminus",
+    "lat": 22.57688,
+    "lon": 88.43922,
+    "wc": 0,
+    "tags": {
+      "amenity": "bus_station",
+      "bus": "yes",
+      "name": "Nabadiganta Bus Terminus",
+      "operator:type": "private",
+      "public_transport": "station"
+    }
+  },
+  {
+    "name": "Japani Gate Salt Lake Mini Bus Terminus",
+    "lat": 22.57904,
+    "lon": 88.42612,
+    "wc": 0,
+    "tags": {
+      "bench": "yes",
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "Japani Gate Salt Lake Mini Bus Terminus",
+      "public_transport": "platform",
+      "shelter": "yes"
+    }
+  },
+  {
+    "name": "58 Bus Stand",
+    "lat": 22.57129,
+    "lon": 88.31084,
+    "wc": 0,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "58 Bus Stand"
+    }
+  },
+  {
+    "name": "Mandirtala Bus Stand",
+    "lat": 22.56971,
+    "lon": 88.31764,
+    "wc": 0,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "Mandirtala Bus Stand",
+      "shelter": "yes"
+    }
+  },
+  {
+    "name": "Shakuntala Park Bus Terminal",
+    "lat": 22.48508,
+    "lon": 88.28958,
+    "wc": 0,
+    "tags": {
+      "highway": "bus_stop",
+      "name": "Shakuntala Park Bus Terminal"
+    }
+  },
+  {
+    "name": "35 Bus Stand",
+    "lat": 22.56138,
+    "lon": 88.40493,
+    "wc": 0,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "35 Bus Stand",
+      "public_transport": "platform"
+    }
+  },
+  {
+    "name": "FD Block bus stand",
+    "lat": 22.58441,
+    "lon": 88.41139,
+    "wc": 0,
+    "tags": {
+      "bus": "yes",
+      "highway": "bus_stop",
+      "name": "FD Block bus stand",
+      "public_transport": "platform"
+    }
+  },
+  {
+    "name": "Subway to CTC Bus Stand and Road Crossing",
+    "lat": 22.49412,
+    "lon": 88.34532,
+    "wc": 3,
+    "tags": {
+      "addr:housenumber": "120",
+      "addr:postcode": "700033",
+      "addr:state": "WB",
+      "addr:street": "Deshapran Sashmal Road",
+      "building": "yes",
+      "covered": "yes",
+      "name": "Subway to CTC Bus Stand and Road Crossing",
+      "operator:wikidata": "Q244457",
+      "public_transport": "station",
+      "railway": "station",
+      "shelter": "yes",
+      "sign": "yes",
+      "station": "subway",
+      "subway": "yes",
+      "wheelchair": "no"
+    }
+  }
+]
