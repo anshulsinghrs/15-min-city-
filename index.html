@@ -233,33 +233,6 @@
     font-weight: 700;
     font-size: 10.5px;
   }
-  .author-attribution {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 5px;
-    padding: 2.5px 8px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(13, 148, 136, 0.08) 100%);
-    border: 1px solid rgba(37, 99, 235, 0.22);
-    border-radius: 12px;
-    font-weight: 500;
-    width: fit-content;
-  }
-  .author-attribution b {
-    color: var(--accent);
-    font-weight: 700;
-  }
-  .author-inst {
-    background: var(--accent);
-    color: #ffffff;
-    font-size: 9.5px;
-    font-weight: 800;
-    padding: 1.5px 5px;
-    border-radius: 4px;
-    letter-spacing: 0.5px;
-  }
   .footer-credit {
     text-align: center;
     font-size: 11px;
@@ -1460,9 +1433,6 @@
           <span>Kolkata Walkability & Equity</span>
           <span class="city-badge">OSM Data</span>
         </div>
-        <div class="author-attribution">
-          <span>🎓</span> Made by <b>Anshul Singh</b> <span class="author-inst">IIT KGP</span>
-        </div>
       </div>
     </div>
     <div class="header-actions">
@@ -2014,7 +1984,7 @@ function useStreetBase(reason) {
 try {
   baseLayer = L.maplibreGL({
     style: BASEMAP_STYLE,
-    attributionControl: { customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Data: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a> | <b>Made by Anshul Singh (IIT KGP)</b>' }
+    attributionControl: { customAttribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Data: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>' }
   }).addTo(map);
 
   let logged = 0;
