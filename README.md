@@ -1,6 +1,6 @@
 # 15 minutes. For whom? — Kolkata
 
-> **Made by VR**  
+> **Made by VR Lab**  
 > *Indian Institute of Technology Kharagpur (IIT KGP)*  
 > GitHub: [@anshulsinghrs](https://github.com/anshulsinghrs)
 
