@@ -12,10 +12,6 @@ on:
       tile_km:
         description: "Tile size in km"
         default: "2.5"
-  push:
-    paths:
-      - export_city.py
-      - .github/workflows/export-kolkata.yml
 
 permissions:
   contents: write
