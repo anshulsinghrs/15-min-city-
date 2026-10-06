@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>15 minutes. For whom? — Kolkata Isochrone Explorer</title>
+<title>15 minutes. For whom? — India Tier 1 Cities Isochrone Explorer</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚶</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -325,6 +325,73 @@
     border-radius: 3px;
   }
 
+  /* City Selector Card */
+  .city-selector-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: all 0.25s ease;
+  }
+  .city-selector-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.1);
+  }
+  .city-selector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+  }
+  .city-count-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .city-select-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .city-dropdown {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 34px 9px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+    background: var(--panel-bg);
+    color: var(--text-main);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  .city-dropdown:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  }
+  .city-select-wrap::after {
+    content: "▼";
+    font-size: 9px;
+    color: var(--text-muted);
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+  }
+
   /* Landmark Quick Jumper */
   .landmark-box {
     margin-bottom: 2px;
@@ -542,10 +609,10 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     transition: transform 0.25s cubic-bezier(0.2, 0.85, 0.3, 1.2);
   }
-  .custom-toggle input[type="checkbox"]:checked + .toggle-switch-track {
+  .custom-toggle input[type="checkbox"]:checked ~ .toggle-switch-track {
     background: var(--accent);
   }
-  .custom-toggle input[type="checkbox"]:checked + .toggle-switch-track .toggle-switch-thumb {
+  .custom-toggle input[type="checkbox"]:checked ~ .toggle-switch-track .toggle-switch-thumb {
     transform: translateX(16px);
   }
 
@@ -884,6 +951,22 @@
     color: white;
     font-size: 10px;
     font-weight: 800;
+  }
+  .metro-map-tooltip {
+    background: rgba(15, 23, 42, 0.94) !important;
+    backdrop-filter: blur(8px) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(56, 189, 248, 0.5) !important;
+    border-radius: 7px !important;
+    padding: 4px 9px !important;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+    pointer-events: none !important;
+  }
+  .metro-map-tooltip::before {
+    border-top-color: rgba(15, 23, 42, 0.94) !important;
   }
 
   /* Train / Suburban Rail Connectivity Card */
@@ -1362,6 +1445,69 @@
     opacity: 1;
   }
 
+  /* City Study Boundary & Mask Layer Styles */
+  .boundary-glow {
+    filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.7));
+    transition: filter 0.3s ease;
+  }
+  .boundary-flash {
+    animation: boundaryFlashAnim 1.2s ease-out;
+  }
+  @keyframes boundaryFlashAnim {
+    0% { stroke: #f59e0b !important; stroke-width: 6 !important; filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)) !important; }
+    50% { stroke: #ef4444 !important; stroke-width: 5 !important; filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.85)) !important; }
+    100% { stroke: var(--accent) !important; stroke-width: 3 !important; filter: drop-shadow(0 0 10px var(--accent-glow)) !important; }
+  }
+
+  /* Floating Boundary Pill HUD (Top-Right) */
+  .boundary-hud-pill {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 900;
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
+    box-shadow: var(--shadow-float);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+    user-select: none;
+  }
+  .boundary-hud-pill:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  .boundary-hud-btn {
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .boundary-hud-btn:hover {
+    transform: scale(1.06);
+    background: var(--accent-light);
+  }
+
+  /* Corner Coordinates Badges */
+  .boundary-corner-mark {
+    background: none !important;
+    border: none !important;
+    pointer-events: none !important;
+  }
+
   /* Mobile Layout */
   @media (max-width: 768px) {
     #panel {
@@ -1393,6 +1539,13 @@
 
 <!-- Map Container -->
 <div id="map"></div>
+
+<!-- Floating City Study Boundary HUD Pill -->
+<div class="boundary-hud-pill" id="boundaryHudPill" title="City study boundary and coverage metrics">
+  <span style="font-size:13px;">📐</span>
+  <span id="boundaryHudText">Study Boundary</span>
+  <button type="button" class="boundary-hud-btn" id="fitBoundaryBtn" title="Fit camera to city study boundary">Fit Bounds</button>
+</div>
 
 <!-- Floating Map Instruction Pill -->
 <div class="map-floating-hint">
@@ -1430,8 +1583,8 @@
       <div>
         <h1 class="brand-title">15-min <span>City</span></h1>
         <div class="brand-subtitle">
-          <span>Kolkata Walkability & Equity</span>
-          <span class="city-badge">OSM Data</span>
+          <span id="brandCitySubtitle">Kolkata Walkability & Equity</span>
+          <span class="city-badge" id="brandCityBadge">OSM Data</span>
         </div>
       </div>
     </div>
@@ -1454,13 +1607,24 @@
 
   <!-- Body -->
   <div class="panel-body">
-    <!-- Landmark Presets -->
+    <!-- City Selector (Elevated & Modern) -->
+    <div class="city-selector-card" id="cityBox">
+      <div class="city-selector-header">
+        <span>🏙️ Active City</span>
+        <span class="city-count-badge" id="cityCountBadge">Tier 1 Cities</span>
+      </div>
+      <div class="city-select-wrap">
+        <select id="city" class="city-dropdown" title="Select a city to explore"></select>
+      </div>
+    </div>
+
+    <!-- Landmark Presets (Dynamic per City) -->
     <div class="landmark-box">
       <div class="landmark-title">
-        <span>Kolkata Landmarks</span>
+        <span id="landmarkTitle">Kolkata Landmarks</span>
         <span style="font-weight: normal; font-size: 10.5px;">Click to teleport</span>
       </div>
-      <div class="landmark-carousel">
+      <div class="landmark-carousel" id="landmarkCarousel">
         <button type="button" class="landmark-btn" onclick="teleportTo(22.5648, 88.3515, 'Esplanade Bus Terminus')">🚌 Esplanade Bus Terminus</button>
         <button type="button" class="landmark-btn" onclick="teleportTo(22.5862, 88.3430, 'Howrah Bus Station')">🚌 Howrah Bus Station</button>
         <button type="button" class="landmark-btn" onclick="teleportTo(22.5856, 88.4210, 'Karunamoyee Bus Terminus')">🚌 Karunamoyee Bus Terminus</button>
@@ -1477,13 +1641,6 @@
         <button type="button" class="landmark-btn" onclick="teleportTo(22.5744, 88.3639, 'College Street')">📚 College Street</button>
         <button type="button" class="landmark-btn" onclick="teleportTo(22.6000, 88.4600, 'Eco Park New Town')">🌳 Eco Park</button>
       </div>
-    </div>
-
-    <!-- City Selector (if multiple cities exist) -->
-    <div class="ctl" id="cityBox" style="display:none">
-      <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">City
-        <select id="city" style="width:100%;font:inherit;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--panel-border);background:var(--card-bg);color:var(--text-main)"></select>
-      </label>
     </div>
 
     <!-- Section: Controls -->
@@ -1545,10 +1702,26 @@
       </div>
       <div class="toggle-group">
         <label class="custom-toggle">
+          <input type="checkbox" id="showBoundary" checked>
+          <span class="toggle-text">
+            <span class="dot" style="background:#0ea5e9;box-shadow:0 0 6px #0ea5e9"></span>
+            <span id="boundaryLayerLabel"><b>Official Municipal City Boundary</b></span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
+          <input type="checkbox" id="showTileGrid">
+          <span class="toggle-text">
+            <span class="dot" style="background:#6366f1;box-shadow:0 0 6px #6366f1"></span>
+            <span><b>Analysis Tile Grid (2.5 km Cells)</b></span>
+          </span>
+          <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
+        </label>
+        <label class="custom-toggle">
           <input type="checkbox" id="showRail" checked>
           <span class="toggle-text">
             <span class="rail-dot-glyph">🚆</span>
-            <span><b>Suburban Railway Stations (ER / SER)</b></span>
+            <span id="railLayerLabel"><b>Suburban Railway Stations</b></span>
           </span>
           <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
         </label>
@@ -1556,7 +1729,7 @@
           <input type="checkbox" id="showMetro" checked>
           <span class="toggle-text">
             <span class="metro-dot-glyph">Ⓜ</span>
-            <span><b>Kolkata Metro Stations &amp; Gates</b></span>
+            <span id="metroLayerLabel"><b>Metro Stations &amp; Gates</b></span>
           </span>
           <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
         </label>
@@ -1564,7 +1737,7 @@
           <input type="checkbox" id="showBusStation" checked>
           <span class="toggle-text">
             <span class="bus-dot-glyph">🚌</span>
-            <span><b>Bus Terminals &amp; Major Stands</b></span>
+            <span id="busLayerLabel"><b>Bus Terminals &amp; Major Stands</b></span>
           </span>
           <span class="toggle-switch-track"><span class="toggle-switch-thumb"></span></span>
         </label>
@@ -1921,6 +2094,8 @@ let metroHighlight = null;
 function flyToMetro(lat, lon, name) {
   map.flyTo([lat, lon], 16, { duration: 1.2 });
   if (metroHighlight) { map.removeLayer(metroHighlight); }
+  const trans = (typeof CITY_TRANSIT_NAMES !== "undefined" && CITY_TRANSIT_NAMES[CITY]) ? CITY_TRANSIT_NAMES[CITY] : {};
+  const mNet = trans.metro || "Metro Rapid Transit";
   metroHighlight = L.circleMarker([lat, lon], {
     radius: 12,
     color: "#38bdf8",
@@ -1928,15 +2103,17 @@ function flyToMetro(lat, lon, name) {
     fillOpacity: 0.9,
     weight: 3
   }).addTo(map);
-  metroHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>Ⓜ ${name} Metro</b><div style="font-size:11px;color:#64748b;margin-top:2px;">Kolkata Metro Network</div></div>`).openPopup();
-  setTimeout(() => { if (metroHighlight) { map.removeLayer(metroHighlight); metroHighlight = null; } }, 5000);
-  showToast(`Centered on Ⓜ ${name} Metro`, "Ⓜ️");
+  metroHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>Ⓜ ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">${mNet}</div></div>`).openPopup();
+  setTimeout(() => { if (metroHighlight) { map.removeLayer(metroHighlight); metroHighlight = null; } }, 6000);
+  showToast(`Centered on Ⓜ ${name}`, "Ⓜ️");
 }
 
 let trainHighlight = null;
 function flyToTrain(lat, lon, name) {
   map.flyTo([lat, lon], 16, { duration: 1.2 });
   if (trainHighlight) { map.removeLayer(trainHighlight); }
+  const trans = (typeof CITY_TRANSIT_NAMES !== "undefined" && CITY_TRANSIT_NAMES[CITY]) ? CITY_TRANSIT_NAMES[CITY] : {};
+  const rNet = trans.rail || "Indian Railways Network";
   trainHighlight = L.circleMarker([lat, lon], {
     radius: 13,
     color: "#fef08a",
@@ -1944,8 +2121,8 @@ function flyToTrain(lat, lon, name) {
     fillOpacity: 0.95,
     weight: 3.5
   }).addTo(map);
-  trainHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>🚆 ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">Indian Railways • Kolkata Suburban Network</div></div>`).openPopup();
-  setTimeout(() => { if (trainHighlight) { map.removeLayer(trainHighlight); trainHighlight = null; } }, 5000);
+  trainHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>🚆 ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">${rNet}</div></div>`).openPopup();
+  setTimeout(() => { if (trainHighlight) { map.removeLayer(trainHighlight); trainHighlight = null; } }, 6000);
   showToast(`Centered on 🚆 ${name}`, "🚆");
 }
 
@@ -1953,6 +2130,8 @@ let busHighlight = null;
 function flyToBusStation(lat, lon, name) {
   map.flyTo([lat, lon], 16, { duration: 1.2 });
   if (busHighlight) { map.removeLayer(busHighlight); }
+  const trans = (typeof CITY_TRANSIT_NAMES !== "undefined" && CITY_TRANSIT_NAMES[CITY]) ? CITY_TRANSIT_NAMES[CITY] : {};
+  const bNet = trans.bus || "City Bus Terminus";
   busHighlight = L.circleMarker([lat, lon], {
     radius: 13,
     color: "#a7f3d0",
@@ -1960,8 +2139,8 @@ function flyToBusStation(lat, lon, name) {
     fillOpacity: 0.95,
     weight: 3.5
   }).addTo(map);
-  busHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>🚌 ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">Kolkata Bus Terminus / Major Stand</div></div>`).openPopup();
-  setTimeout(() => { if (busHighlight) { map.removeLayer(busHighlight); busHighlight = null; } }, 5000);
+  busHighlight.bindPopup(`<div style="font-family:sans-serif;padding:3px 6px;"><b>🚌 ${name}</b><div style="font-size:11px;color:#64748b;margin-top:2px;">${bNet}</div></div>`).openPopup();
+  setTimeout(() => { if (busHighlight) { map.removeLayer(busHighlight); busHighlight = null; } }, 6000);
   showToast(`Centered on 🚌 ${name}`, "🚌");
 }
 
@@ -2141,7 +2320,7 @@ function setPois(cats, pts) {
 
 function loadTile(k) {
   if (tileInflight.has(k)) return tileInflight.get(k);
-  const p = fetch(DATA_DIR + "t/" + k + ".bin")
+  const p = fetch(DATA_DIR + "t/" + k + ".bin?v=" + (META && META.pois ? META.pois : Date.now()), { cache: "reload" })
     .then(r => { if (!r.ok) throw new Error("tile " + k + " not found"); return r.arrayBuffer(); })
     .then(buf => { tileCache.set(k, parseTile(buf)); })
     .finally(() => tileInflight.delete(k));
@@ -2200,7 +2379,8 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
     const c = pts[i][2];
     if (c === 6) {
       const rawName = pts[i][4] || "Metro Station";
-      let stationName = rawName.replace(/\s*Gate\s*[\w\d]+/i, '').replace(/\s*Metro\s*Station/i, '').replace(/\s*Metro/i, '').trim();
+      let stationName = rawName.replace(/\s*Gate\s*[\w\d#.\s]+/i, '').replace(/\s*Metro\s*Station/i, '').replace(/\s*Metro/i, '').trim();
+      stationName = stationName.replace(/\.\s*\d+$/, '').replace(/\s+\d+$/, '').trim();
       if (!stationName) stationName = rawName;
       const node = POIS.snap.node[i];
       const walkMin = node >= 0 ? Math.max(1, Math.round((state.dAdj[node] + poiSnap[i] / curSpd) / 60)) : 1;
@@ -2282,6 +2462,12 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
     </div>
   `).join("");
 
+  const trans = (typeof CITY_TRANSIT_NAMES !== "undefined" && CITY_TRANSIT_NAMES[CITY]) || {
+    metro: "Metro & Rapid Transit",
+    rail: "Suburban & Regional Rail",
+    bus: "Bus Terminals & Stands"
+  };
+
   $("stats").innerHTML = `
     <div class="stats-card">
       <div class="stats-hero">
@@ -2294,15 +2480,15 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
         </div>
       </div>
 
-      <!-- Dedicated Kolkata Metro Reach Card -->
+      <!-- Dedicated Rapid Transit Reach Card -->
       <div class="metro-reach-card">
         <div class="metro-reach-header">
           <div class="metro-title-wrap">
             <span class="metro-icon-badge">Ⓜ</span>
             <div>
-              <div class="metro-main-title">Kolkata Metro Connectivity</div>
+              <div class="metro-main-title">${trans.metro} Connectivity</div>
               <div class="metro-sub-title">
-                ${metroSorted.length > 0 ? `<b>${metroSorted.length}</b> station${metroSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No metro stations within ${$("minutes").value} min`}
+                ${metroSorted.length > 0 ? `<b>${metroSorted.length}</b> station${metroSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No ${trans.metro.toLowerCase()} stations within ${$("minutes").value} min`}
               </div>
             </div>
           </div>
@@ -2312,8 +2498,10 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
         </div>
         ${metroSorted.length > 0 ? `
           <div class="metro-station-list">
-            ${metroSorted.slice(0, 8).map(([name, data]) => `
-              <div class="metro-item-pill" onclick="flyToMetro(${data.lat}, ${data.lon}, '${name}')" title="Center map on ${name} Metro">
+            ${metroSorted.slice(0, 8).map(([name, data]) => {
+              const safeName = name.replace(/'/g, "\\'");
+              return `
+              <div class="metro-item-pill" onclick="flyToMetro(${data.lat}, ${data.lon}, '${safeName}')" title="Center map on ${safeName}">
                 <div class="m-item-left">
                   <span class="m-glyph">Ⓜ</span>
                   <span class="m-name">${name}</span>
@@ -2323,11 +2511,11 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
                   ${data.wc === 1 ? '<span class="m-wc-tag" title="Step-free accessible">♿</span>' : ''}
                 </div>
               </div>
-            `).join("")}
+            `;}).join("")}
           </div>
         ` : `
           <div class="metro-empty-hint">
-            <span>🚶 No Metro within ${$("minutes").value} min. Increase time or walk speed to connect with Metro corridors.</span>
+            <span>🚶 No ${trans.metro} within ${$("minutes").value} min. Increase time or walk speed to connect with transit corridors.</span>
           </div>
         `}
       </div>
@@ -2338,7 +2526,7 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
           <div class="train-title-wrap">
             <span class="train-icon-badge">🚆</span>
             <div>
-              <div class="train-main-title">Suburban Railway (ER &amp; SER)</div>
+              <div class="train-main-title">${trans.rail}</div>
               <div class="train-sub-title">
                 ${trainSorted.length > 0 ? `<b>${trainSorted.length}</b> station${trainSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No railway stations within ${$("minutes").value} min walk`}
               </div>
@@ -2350,8 +2538,10 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
         </div>
         ${trainSorted.length > 0 ? `
           <div class="train-station-list">
-            ${trainSorted.slice(0, 8).map(([name, data]) => `
-              <div class="train-item-pill" onclick="flyToTrain(${data.lat}, ${data.lon}, '${name}')" title="Center map on ${name}">
+            ${trainSorted.slice(0, 8).map(([name, data]) => {
+              const safeName = name.replace(/'/g, "\\'");
+              return `
+              <div class="train-item-pill" onclick="flyToTrain(${data.lat}, ${data.lon}, '${safeName}')" title="Center map on ${safeName}">
                 <div class="t-item-left">
                   <span class="t-glyph">🚆</span>
                   <span class="t-name">${name}</span>
@@ -2361,7 +2551,7 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
                   ${data.wc === 1 ? '<span class="t-wc-tag" title="Step-free accessible">♿</span>' : ''}
                 </div>
               </div>
-            `).join("")}
+            `;}).join("")}
           </div>
         ` : `
           <div class="train-empty-hint">
@@ -2376,7 +2566,7 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
           <div class="bus-title-wrap">
             <span class="bus-icon-badge">🚌</span>
             <div>
-              <div class="bus-main-title">Bus Terminals &amp; Major Stands</div>
+              <div class="bus-main-title">${trans.bus}</div>
               <div class="bus-sub-title">
                 ${busSorted.length > 0 ? `<b>${busSorted.length}</b> bus terminal${busSorted.length === 1 ? '' : 's'} reachable within ${$("minutes").value} min walk` : `No bus terminals within ${$("minutes").value} min walk`}
               </div>
@@ -2388,8 +2578,10 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
         </div>
         ${busSorted.length > 0 ? `
           <div class="bus-station-list">
-            ${busSorted.slice(0, 8).map(([name, data]) => `
-              <div class="bus-item-pill" onclick="flyToBusStation(${data.lat}, ${data.lon}, '${name}')" title="Center map on ${name}">
+            ${busSorted.slice(0, 8).map(([name, data]) => {
+              const safeName = name.replace(/'/g, "\\'");
+              return `
+              <div class="bus-item-pill" onclick="flyToBusStation(${data.lat}, ${data.lon}, '${safeName}')" title="Center map on ${safeName}">
                 <div class="b-item-left">
                   <span class="b-glyph">🚌</span>
                   <span class="b-name">${name}</span>
@@ -2399,7 +2591,7 @@ function showStats(rA, rR, cA, cR, stUsable, stA, stR) {
                   ${data.wc === 1 ? '<span class="b-wc-tag" title="Step-free accessible">♿</span>' : ''}
                 </div>
               </div>
-            `).join("")}
+            `;}).join("")}
           </div>
         ` : `
           <div class="bus-empty-hint">
@@ -2530,6 +2722,7 @@ function draw() {
   const showRail = $("showRail") ? $("showRail").checked : true;
   const showBusStation = $("showBusStation") ? $("showBusStation").checked : true;
   const pts = POIS.pts;
+  const drawnMetroNames = new Set();
   for (let i = 0; i < pts.length; i++) {
     if (!state.inAdj[i]) continue;
     const c = pts[i][2];
@@ -2605,6 +2798,29 @@ function draw() {
         ctx.fillText("M", px, py + 0.6);
       }
       ctx.globalAlpha = 1;
+
+      // Draw Station Name on map canvas when zoomed in
+      if (z >= 13 && pts[i][4]) {
+        const raw = pts[i][4];
+        let sName = raw.replace(/\s*Gate\s*[\w\d#.\s]+/i, '').replace(/\s*Metro\s*Station/i, '').replace(/\s*Metro/i, '').trim();
+        sName = sName.replace(/\.\s*\d+$/, '').replace(/\s+\d+$/, '').trim();
+        if (!sName) sName = raw;
+        if (sName && !drawnMetroNames.has(sName)) {
+          drawnMetroNames.add(sName);
+          ctx.save();
+          ctx.font = z >= 15 ? "700 11.5px 'Plus Jakarta Sans', system-ui, sans-serif" : "600 10px 'Plus Jakarta Sans', system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          // High contrast dark stroke/halo for crisp legibility over map backgrounds
+          ctx.lineJoin = "round";
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = "rgba(15, 23, 42, 0.92)";
+          ctx.strokeText(sName, px, py + 10);
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(sName, px, py + 10);
+          ctx.restore();
+        }
+      }
     } else if (c === 10) {
       if (!showSt) continue;
       const wc = pts[i][3], usable = !state.avoid || wc === 1;
@@ -2660,6 +2876,158 @@ function showToast(msg, icon = "✨") {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
 }
 
+// Multi-City Landmarks & Rapid Transit Configuration
+const CITY_LANDMARKS = {
+  kolkata: [
+    { icon: "🚌", name: "Esplanade Bus Terminus", lat: 22.5648, lon: 88.3515 },
+    { icon: "🚌", name: "Howrah Bus Station", lat: 22.5862, lon: 88.3430 },
+    { icon: "🚌", name: "Karunamoyee Terminus", lat: 22.5856, lon: 88.4210 },
+    { icon: "🚌", name: "Jadavpur 8B Stand", lat: 22.4957, lon: 88.3706 },
+    { icon: "🚉", name: "Howrah Junction (HWH)", lat: 22.5829, lon: 88.3428 },
+    { icon: "🚉", name: "Sealdah Station (SDAH)", lat: 22.5680, lon: 88.3711 },
+    { icon: "🏛️", name: "Victoria Memorial", lat: 22.5448, lon: 88.3426 },
+    { icon: "Ⓜ️", name: "Esplanade Metro", lat: 22.5646, lon: 88.3515 },
+    { icon: "Ⓜ️", name: "Park Street Metro", lat: 22.5511, lon: 88.3524 },
+    { icon: "Ⓜ️", name: "Salt Lake Sector V", lat: 22.5700, lon: 88.4330 },
+    { icon: "📚", name: "College Street", lat: 22.5744, lon: 88.3639 },
+    { icon: "🌳", name: "Eco Park New Town", lat: 22.6000, lon: 88.4600 }
+  ],
+  ahmedabad: [
+    { icon: "🏛️", name: "Sabarmati Ashram", lat: 23.0605, lon: 72.5800 },
+    { icon: "🌊", name: "Sabarmati Riverfront", lat: 23.0305, lon: 72.5750 },
+    { icon: "🛍️", name: "Manek Chowk", lat: 23.0240, lon: 72.5890 },
+    { icon: "🌳", name: "Kankaria Lake", lat: 23.0063, lon: 72.6025 },
+    { icon: "🚉", name: "Kalupur Station (ADI)", lat: 23.0225, lon: 72.6005 },
+    { icon: "🌳", name: "Law Garden", lat: 23.0245, lon: 72.5590 },
+    { icon: "🎓", name: "IIM Ahmedabad", lat: 23.0315, lon: 72.5315 },
+    { icon: "🌊", name: "Vastrapur Lake", lat: 23.0355, lon: 72.5285 }
+  ],
+  bengaluru: [
+    { icon: "🌳", name: "Cubbon Park", lat: 12.9763, lon: 77.5929 },
+    { icon: "🏛️", name: "Vidhana Soudha", lat: 12.9796, lon: 77.5907 },
+    { icon: "Ⓜ️", name: "MG Road Metro", lat: 12.9756, lon: 77.6066 },
+    { icon: "🌺", name: "Lalbagh Botanical Garden", lat: 12.9507, lon: 77.5848 },
+    { icon: "🚉", name: "KSR Bengaluru (Majestic)", lat: 12.9781, lon: 77.5696 },
+    { icon: "🚌", name: "Majestic Bus Station", lat: 12.9767, lon: 77.5713 },
+    { icon: "🛍️", name: "Indiranagar 100ft Rd", lat: 12.9719, lon: 77.6412 },
+    { icon: "🛍️", name: "Koramangala 5th Block", lat: 12.9345, lon: 77.6200 }
+  ],
+  chennai: [
+    { icon: "🏖️", name: "Marina Beach", lat: 13.0500, lon: 80.2824 },
+    { icon: "🚉", name: "Chennai Central (MAS)", lat: 13.0827, lon: 80.2755 },
+    { icon: "🛕", name: "Kapaleeshwarar Temple", lat: 13.0336, lon: 80.2699 },
+    { icon: "🚉", name: "Chennai Egmore (MS)", lat: 13.0784, lon: 80.2608 },
+    { icon: "🛍️", name: "T. Nagar Ranganathan St", lat: 13.0405, lon: 80.2337 },
+    { icon: "🏛️", name: "Fort St. George", lat: 13.0797, lon: 80.2874 },
+    { icon: "⛪", name: "San Thome Basilica", lat: 13.0335, lon: 80.2780 },
+    { icon: "🏛️", name: "Valluvar Kottam", lat: 13.0528, lon: 80.2415 }
+  ],
+  delhi: [
+    { icon: "⭕", name: "Connaught Place (CP)", lat: 28.6315, lon: 77.2167 },
+    { icon: "🏛️", name: "India Gate", lat: 28.6129, lon: 77.2295 },
+    { icon: "🛕", name: "Akshardham Temple", lat: 28.6127, lon: 77.2773 },
+    { icon: "🚌", name: "Anand Vihar ISBT & Terminal", lat: 28.6508, lon: 77.3152 },
+    { icon: "🛍️", name: "Preet Vihar / Vikas Marg", lat: 28.6360, lon: 77.2950 },
+    { icon: "🏰", name: "Red Fort", lat: 28.6562, lon: 77.2410 },
+    { icon: "🛍️", name: "Chandni Chowk", lat: 28.6506, lon: 77.2303 },
+    { icon: "🚉", name: "New Delhi Railway (NDLS)", lat: 28.6430, lon: 77.2195 },
+    { icon: "🌳", name: "Hauz Khas Village & Fort", lat: 28.5495, lon: 77.1930 },
+    { icon: "🛍️", name: "Saket Select Citywalk", lat: 28.5285, lon: 77.2190 },
+    { icon: "🏛️", name: "Qutub Minar", lat: 28.5245, lon: 77.1855 },
+    { icon: "🛕", name: "Lotus Temple (Kalkaji)", lat: 28.5535, lon: 77.2588 },
+    { icon: "🛍️", name: "Rajouri Garden Market", lat: 28.6500, lon: 77.1215 },
+    { icon: "🎓", name: "Delhi University North Campus", lat: 28.6900, lon: 77.2100 }
+  ],
+  mumbai: [
+    { icon: "🏛️", name: "Gateway of India", lat: 18.9220, lon: 72.8347 },
+    { icon: "🌊", name: "Marine Drive", lat: 18.9430, lon: 72.8230 },
+    { icon: "🚉", name: "CSMT Terminus", lat: 18.9400, lon: 72.8354 },
+    { icon: "🚉", name: "Churchgate Station", lat: 18.9322, lon: 72.8264 },
+    { icon: "🛕", name: "Siddhivinayak Temple", lat: 19.0168, lon: 72.8303 },
+    { icon: "🌳", name: "Dadar Shivaji Park", lat: 19.0270, lon: 72.8380 },
+    { icon: "🌊", name: "Bandra Bandstand", lat: 19.0490, lon: 72.8200 },
+    { icon: "🏢", name: "Bandra Kurla Complex (BKC)", lat: 19.0620, lon: 72.8670 },
+    { icon: "🏖️", name: "Juhu Beach", lat: 19.0988, lon: 72.8264 },
+    { icon: "🕌", name: "Haji Ali Dargah", lat: 18.9827, lon: 72.8090 },
+    { icon: "🛍️", name: "Colaba Causeway", lat: 18.9180, lon: 72.8290 },
+    { icon: "🏙️", name: "Nariman Point", lat: 18.9260, lon: 72.8210 }
+  ],
+  hyderabad: [
+    { icon: "🏛️", name: "Charminar", lat: 17.3616, lon: 78.4747 },
+    { icon: "🌊", name: "Hussain Sagar / Tank Bund", lat: 17.4239, lon: 78.4738 },
+    { icon: "👑", name: "Chowmahalla Palace", lat: 17.3578, lon: 78.4717 },
+    { icon: "🏛️", name: "Salar Jung Museum", lat: 17.3713, lon: 78.4804 },
+    { icon: "🛍️", name: "Abids Market", lat: 17.3900, lon: 78.4750 },
+    { icon: "🚉", name: "Secunderabad Junction", lat: 17.4344, lon: 78.5015 },
+    { icon: "🛕", name: "Birla Mandir", lat: 17.4062, lon: 78.4691 },
+    { icon: "🛍️", name: "Banjara Hills Rd 1", lat: 17.4150, lon: 78.4450 },
+    { icon: "🌊", name: "Lumbini Park & Hussain Sagar", lat: 17.4150, lon: 78.4750 }
+  ],
+  pune: [
+    { icon: "🏰", name: "Shaniwar Wada", lat: 18.5196, lon: 73.8553 },
+    { icon: "🛍️", name: "FC Road / Deccan", lat: 18.5204, lon: 73.8415 },
+    { icon: "🛕", name: "Dagdusheth Halwai", lat: 18.5165, lon: 73.8560 },
+    { icon: "🚉", name: "Pune Junction (PUNE)", lat: 18.5284, lon: 73.8744 },
+    { icon: "🚉", name: "Shivajinagar Station", lat: 18.5320, lon: 73.8520 },
+    { icon: "🌳", name: "Saras Baug", lat: 18.5008, lon: 73.8540 },
+    { icon: "🌳", name: "Koregaon Park (KP)", lat: 18.5362, lon: 73.8940 },
+    { icon: "🚌", name: "Swargate Bus Stand", lat: 18.5018, lon: 73.8580 }
+  ],
+  gurgaon: [
+    { icon: "🏢", name: "DLF Cyber City / Cyber Hub", lat: 28.4950, lon: 77.0860 },
+    { icon: "🛍️", name: "Sector 29 Market", lat: 28.4680, lon: 77.0620 },
+    { icon: "Ⓜ️", name: "Millennium City Centre", lat: 28.4595, lon: 77.0725 },
+    { icon: "🛍️", name: "Ambience Mall / NH-48", lat: 28.5020, lon: 77.0865 },
+    { icon: "🏢", name: "Golf Course Road", lat: 28.4720, lon: 77.0865 },
+    { icon: "🛍️", name: "Galleria Market (DLF Phase 4)", lat: 28.4675, lon: 77.0815 },
+    { icon: "🛕", name: "Sheetla Mata Mandir", lat: 28.4740, lon: 77.0300 },
+    { icon: "🚉", name: "Gurgaon Railway Station", lat: 28.4870, lon: 77.0180 }
+  ]
+};
+
+const CITY_TRANSIT_NAMES = {
+  kolkata: { metro: "Kolkata Metro", rail: "Suburban Railway (ER & SER)", bus: "Kolkata Bus Terminals" },
+  ahmedabad: { metro: "Ahmedabad Metro (GMRC)", rail: "Western Railway", bus: "AMTS & BRTS Terminals" },
+  bengaluru: { metro: "Namma Metro", rail: "South Western Railway", bus: "BMTC Bus Terminals" },
+  chennai: { metro: "Chennai Metro (CMRL)", rail: "Chennai Suburban Railway", bus: "MTC Bus Terminals" },
+  delhi: { metro: "Delhi Metro (DMRC)", rail: "Northern Railway", bus: "DTC Bus Terminals" },
+  mumbai: { metro: "Mumbai Metro", rail: "Mumbai Suburban Railway (Local)", bus: "BEST Bus Depots" },
+  hyderabad: { metro: "Hyderabad Metro Rail", rail: "MMTS Commuter Rail", bus: "TSRTC Bus Terminals" },
+  pune: { metro: "Pune Metro (Maha Metro)", rail: "Pune Suburban Railway", bus: "PMPML Bus Terminals" },
+  gurgaon: { metro: "Rapid Metro & DMRC", rail: "Northern Railway", bus: "Gurugaman Bus Terminals" }
+};
+
+function updateLandmarks(cityId, cityName) {
+  const container = $("landmarkCarousel");
+  const title = $("landmarkTitle");
+  if (title) title.textContent = `${cityName || cityId} Landmarks`;
+  if (!container) return;
+  const list = CITY_LANDMARKS[cityId] || [];
+  if (list.length === 0) {
+    container.innerHTML = `<span style="font-size:11.5px;color:var(--text-muted);padding:4px 6px;">Click anywhere on the map to set an origin point.</span>`;
+    return;
+  }
+  container.innerHTML = list.map(item => `
+    <button type="button" class="landmark-btn" onclick="teleportTo(${item.lat}, ${item.lon}, '${item.name.replace(/'/g, "\\'")}')">
+      ${item.icon} ${item.name}
+    </button>
+  `).join("");
+}
+
+function updateTransitLabels(cityId, cityName) {
+  const trans = CITY_TRANSIT_NAMES[cityId] || {
+    metro: `${cityName || cityId} Metro`,
+    rail: "Regional & Suburban Railway",
+    bus: "Bus Terminals & Stands"
+  };
+  const mLabel = $("metroLayerLabel");
+  if (mLabel) mLabel.innerHTML = `<b>${trans.metro} Stations &amp; Gates</b>`;
+  const rLabel = $("railLayerLabel");
+  if (rLabel) rLabel.innerHTML = `<b>${trans.rail} Stations</b>`;
+  const bLabel = $("busLayerLabel");
+  if (bLabel) bLabel.innerHTML = `<b>${trans.bus}</b>`;
+}
+
 // Teleport landmark
 function teleportTo(lat, lng, name) {
   origin = L.latLng(lat, lng);
@@ -2681,6 +3049,120 @@ $("copyLink").addEventListener("click", async () => {
   setTimeout(() => { $("copyMsg").textContent = ""; }, 3000);
 });
 
+// ============ OFFICIAL MUNICIPAL CITY BOUNDARY ============
+let boundaryLayerGroup = null;
+let tileGridLayerGroup = null;
+let currentBoundaryData = null;
+let boundaryGeoJsonLayer = null;
+
+function updateCityBoundaryLayer() {
+  if (!boundaryLayerGroup) boundaryLayerGroup = L.layerGroup().addTo(map);
+  if (!tileGridLayerGroup) tileGridLayerGroup = L.layerGroup().addTo(map);
+
+  boundaryLayerGroup.clearLayers();
+  tileGridLayerGroup.clearLayers();
+  boundaryGeoJsonLayer = null;
+
+  const showBoundary = $("showBoundary") ? $("showBoundary").checked : true;
+  const showGrid = $("showTileGrid") ? $("showTileGrid").checked : false;
+
+  const cityName = (CITIES.find(c => c.id === CITY) || {}).name || (META && META.name) || CITY;
+  const officialName = currentBoundaryData?.properties?.name || `${cityName} Municipal Boundary`;
+
+  // Update floating HUD pill
+  const hudText = $("boundaryHudText");
+  if (hudText) {
+    hudText.textContent = officialName;
+    hudText.title = officialName;
+  }
+
+  if (showBoundary && currentBoundaryData) {
+    const isDark = document.body.classList.contains("dark-theme");
+    const strokeColor = isDark ? "#2dd4bf" : "#0284c7";
+    const maskColor = isDark ? "#04070e" : "#0f172a";
+    const maskOpacity = isDark ? 0.38 : 0.22;
+
+    // Outer Inverted Focus Mask: Dims world outside official municipal boundary
+    try {
+      const geom = currentBoundaryData.geometry;
+      const worldOuter = [
+        [-89.9, -179.9],
+        [-89.9, 179.9],
+        [89.9, 179.9],
+        [89.9, -179.9]
+      ];
+      let holeRings = [];
+      if (geom.type === "Polygon") {
+        holeRings = geom.coordinates.map(ring => ring.map(pt => [pt[1], pt[0]]));
+      } else if (geom.type === "MultiPolygon") {
+        holeRings = geom.coordinates.map(poly => poly[0].map(pt => [pt[1], pt[0]]));
+      }
+      if (holeRings.length > 0) {
+        const mask = L.polygon([worldOuter, ...holeRings], {
+          stroke: false,
+          fillColor: maskColor,
+          fillOpacity: maskOpacity,
+          interactive: false,
+          pane: "overlayPane"
+        });
+        boundaryLayerGroup.addLayer(mask);
+      }
+    } catch (err) {
+      console.warn("Mask geometry calculation:", err);
+    }
+
+    // Official Municipal Boundary GeoJSON Layer (No rectangles!)
+    boundaryGeoJsonLayer = L.geoJSON(currentBoundaryData, {
+      style: {
+        color: strokeColor,
+        weight: 3.5,
+        opacity: 0.95,
+        dashArray: "7, 5",
+        fillColor: strokeColor,
+        fillOpacity: isDark ? 0.05 : 0.03,
+        className: "boundary-glow"
+      },
+      pane: "overlayPane"
+    });
+    boundaryLayerGroup.addLayer(boundaryGeoJsonLayer);
+    boundaryGeoJsonLayer.bringToFront();
+  }
+
+  // Analysis tile grid if requested
+  if (showGrid && META && META.tiles && META.tiles.list) {
+    const { lon0, lat0, dlon, dlat, list } = META.tiles;
+    for (const key of list) {
+      const parts = key.split("_");
+      const ix = parseInt(parts[0], 10), iy = parseInt(parts[1], 10);
+      const tMinLon = lon0 + ix * dlon, tMaxLon = tMinLon + dlon;
+      const tMinLat = lat0 + iy * dlat, tMaxLat = tMinLat + dlat;
+      const tileRect = L.rectangle([[tMinLat, tMinLon], [tMaxLat, tMaxLon]], {
+        color: "rgba(14, 165, 233, 0.45)",
+        weight: 1,
+        dashArray: "3, 4",
+        fill: false,
+        interactive: false
+      });
+      tileGridLayerGroup.addLayer(tileRect);
+    }
+  }
+}
+
+function flashBoundary() {
+  if (boundaryGeoJsonLayer) {
+    boundaryGeoJsonLayer.eachLayer(layer => {
+      if (layer._path) {
+        layer._path.classList.remove("boundary-flash");
+        void layer._path.offsetWidth;
+        layer._path.classList.add("boundary-flash");
+        setTimeout(() => {
+          if (layer._path) layer._path.classList.remove("boundary-flash");
+        }, 1200);
+      }
+    });
+  }
+}
+
 // Event Listeners for inputs
 ["minutes", "speed"].forEach(id => $(id).addEventListener("input", schedule));
 $("steps").addEventListener("change", schedule);
@@ -2688,9 +3170,100 @@ $("steps").addEventListener("change", schedule);
   const el = $(id);
   if (el) el.addEventListener("change", draw);
 });
-map.on("click", e => { origin = e.latlng; marker.setLatLng(origin); schedule(); });
-marker.on("drag", () => { origin = marker.getLatLng(); schedule(); });
+$("showBoundary")?.addEventListener("change", updateCityBoundaryLayer);
+$("showTileGrid")?.addEventListener("change", updateCityBoundaryLayer);
+$("fitBoundaryBtn")?.addEventListener("click", () => {
+  if (boundaryGeoJsonLayer && boundaryGeoJsonLayer.getBounds().isValid()) {
+    map.fitBounds(boundaryGeoJsonLayer.getBounds(), { padding: [50, 50], maxZoom: 14 });
+    const officialName = currentBoundaryData?.properties?.name || "Official City Boundary";
+    showToast(`View aligned to ${officialName}`, "🏛️");
+  } else if (META && META.bbox) {
+    const [minLon, minLat, maxLon, maxLat] = META.bbox;
+    map.fitBounds([[minLat, minLon], [maxLat, maxLon]], { padding: [50, 50], maxZoom: 14 });
+  }
+});
+
+map.on("click", e => {
+  if (boundaryGeoJsonLayer && boundaryGeoJsonLayer.getBounds().isValid()) {
+    const bounds = boundaryGeoJsonLayer.getBounds();
+    // Allow small 0.01 deg tolerance around official municipal boundary
+    const southWest = L.latLng(bounds.getSouth() - 0.01, bounds.getWest() - 0.01);
+    const northEast = L.latLng(bounds.getNorth() + 0.01, bounds.getEast() + 0.01);
+    const expandedBounds = L.latLngBounds(southWest, northEast);
+    if (!expandedBounds.contains(e.latlng)) {
+      const officialName = currentBoundaryData?.properties?.name || (CITIES.find(c => c.id === CITY) || {}).name || "city";
+      showToast(`📍 Outside official boundary of ${officialName}. Click inside the highlighted municipal area.`, "⚠️");
+      flashBoundary();
+      return;
+    }
+  } else if (META && META.bbox) {
+    const [minLon, minLat, maxLon, maxLat] = META.bbox;
+    const { lat, lng } = e.latlng;
+    if (lat < minLat || lat > maxLat || lng < minLon || lng > maxLon) {
+      const cityName = (CITIES.find(c => c.id === CITY) || {}).name || META.name || "city";
+      showToast(`📍 Clicked outside ${cityName} study area. Please click inside the highlighted boundary.`, "⚠️");
+      flashBoundary();
+      return;
+    }
+  }
+  origin = e.latlng;
+  marker.setLatLng(origin);
+  schedule();
+});
+marker.on("drag", () => {
+  origin = marker.getLatLng();
+  if (boundaryGeoJsonLayer && boundaryGeoJsonLayer.getBounds().isValid()) {
+    if (!boundaryGeoJsonLayer.getBounds().contains(origin)) {
+      flashBoundary();
+    }
+  }
+  schedule();
+});
 map.on("moveend resize zoomend", draw);
+
+// Interactive Hover Tooltip for Metro Stations on Map
+let metroHoverTooltip = null;
+map.on("mousemove", e => {
+  if (!POIS || !POIS.pts || map.getZoom() < 12) {
+    if (metroHoverTooltip) { map.closeTooltip(metroHoverTooltip); metroHoverTooltip = null; }
+    map.getContainer().style.cursor = "";
+    return;
+  }
+  const showMetro = $("showMetro") ? $("showMetro").checked : true;
+  if (!showMetro) {
+    if (metroHoverTooltip) { map.closeTooltip(metroHoverTooltip); metroHoverTooltip = null; }
+    map.getContainer().style.cursor = "";
+    return;
+  }
+  const mousePt = map.latLngToLayerPoint(e.latlng);
+  let closest = null, closestDist = 18;
+  const pts = POIS.pts;
+  for (let i = 0; i < pts.length; i++) {
+    if (pts[i][2] === 6 && pts[i][4]) {
+      const pt = map.latLngToLayerPoint([pts[i][1], pts[i][0]]);
+      const d = Math.hypot(pt.x - mousePt.x, pt.y - mousePt.y);
+      if (d < closestDist) {
+        closestDist = d;
+        closest = pts[i];
+      }
+    }
+  }
+  if (closest) {
+    map.getContainer().style.cursor = "pointer";
+    let sName = closest[4].replace(/\s*Gate\s*[\w\d#.\s]+/i, '').replace(/\s*Metro\s*Station/i, '').replace(/\s*Metro/i, '').trim();
+    sName = sName.replace(/\.\s*\d+$/, '').replace(/\s+\d+$/, '').trim();
+    if (!sName) sName = closest[4];
+    if (!metroHoverTooltip) {
+      metroHoverTooltip = L.tooltip({ direction: 'top', offset: [0, -10], className: 'metro-map-tooltip' });
+    }
+    metroHoverTooltip.setLatLng([closest[1], closest[0]])
+      .setContent(`Ⓜ <b>${sName} Metro</b>`)
+      .addTo(map);
+  } else {
+    map.getContainer().style.cursor = "";
+    if (metroHoverTooltip) { map.closeTooltip(metroHoverTooltip); metroHoverTooltip = null; }
+  }
+});
 
 // Time Presets
 document.querySelectorAll("#timePresets .preset-pill").forEach(btn => {
@@ -2717,7 +3290,8 @@ $("resetViewBtn").addEventListener("click", () => {
     marker.setLatLng(origin);
     map.flyTo(origin, 14, { duration: 1 });
     schedule();
-    showToast("View reset to Kolkata centre", "🎯");
+    const cityName = (CITIES.find(c => c.id === CITY) || {}).name || "city";
+    showToast(`View reset to ${cityName} centre`, "🎯");
   }
 });
 
@@ -2734,7 +3308,9 @@ $("locateBtn").addEventListener("click", () => {
       if (META && META.bbox) {
         const [minLon, minLat, maxLon, maxLat] = META.bbox;
         if (lat < minLat - 0.1 || lat > maxLat + 0.1 || lng < minLon - 0.1 || lng > maxLon + 0.1) {
-          showToast("Your location is outside Kolkata data coverage", "⚠️");
+          const cityName = (CITIES.find(c => c.id === CITY) || {}).name || "city";
+          showToast(`Your location is outside ${cityName} data coverage`, "⚠️");
+          flashBoundary();
           return;
         }
       }
@@ -2775,6 +3351,7 @@ themeBtn.addEventListener("click", () => {
   const isDark = document.body.classList.toggle("dark-theme");
   localStorage.setItem("15min_theme", isDark ? "dark" : "light");
   updateThemeIcon(isDark);
+  updateCityBoundaryLayer();
   showToast(isDark ? "Dark theme enabled" : "Light theme enabled", isDark ? "🌙" : "☀️");
 });
 function updateThemeIcon(isDark) {
@@ -2804,15 +3381,20 @@ async function loadCities() {
     if (r.ok) CITIES = (await r.json()).cities || [];
   } catch (e) { }
   if (!CITIES.length) CITIES = [{ id: "kolkata", name: "Kolkata" }];
-  if (CITIES.length > 1) {
-    const sel = $("city");
+  const sel = $("city");
+  if (sel) {
+    sel.innerHTML = "";
     for (const c of CITIES) {
       const o = document.createElement("option");
       o.value = c.id;
       o.textContent = c.name;
       sel.appendChild(o);
     }
+  }
+  if (CITIES.length > 1) {
     $("cityBox").style.display = "";
+    const countBadge = $("cityCountBadge");
+    if (countBadge) countBadge.textContent = `${CITIES.length} Tier 1 Cities`;
   }
 }
 
@@ -2825,7 +3407,7 @@ async function loadCity(id, fresh) {
   statusEl.className = ""; statusEl.textContent = "Loading street network…";
   draw();
   try {
-    const meta = await fetch(DATA_DIR + "meta.json").then(r => { if (!r.ok) throw new Error("meta.json not found"); return r.json(); });
+    const meta = await fetch(DATA_DIR + "meta.json?t=" + Date.now(), { cache: "reload" }).then(r => { if (!r.ok) throw new Error("meta.json not found"); return r.json(); });
     if (id !== CITY) return;
     if (meta.tiles) tileSet = new Set(meta.tiles.list);
     else {
@@ -2848,6 +3430,23 @@ async function loadCity(id, fresh) {
     map.setMaxBounds([[minLat - 0.05, minLon - 0.08], [maxLat + 0.05, maxLon + 0.08]]);
     map.setMinZoom(10);
     META = meta;
+    try {
+      const bRes = await fetch(DATA_DIR + "boundary.json?t=" + Date.now(), { cache: "reload" }).then(r => r.ok ? r.json() : null);
+      currentBoundaryData = bRes;
+    } catch (e) {
+      currentBoundaryData = null;
+    }
+    updateCityBoundaryLayer();
+
+    const cityName = (CITIES.find(c => c.id === id) || {}).name || meta.name || id;
+    document.title = `15 minutes. For whom? — ${cityName} Isochrone Explorer`;
+    const subEl = $("brandCitySubtitle");
+    if (subEl) subEl.textContent = `${cityName} Walkability & Equity`;
+    updateLandmarks(id, cityName);
+    updateTransitLabels(id, cityName);
+    const countBadge = $("cityCountBadge");
+    if (countBadge && CITIES.length > 1) countBadge.textContent = `${CITIES.length} Tier 1 Cities`;
+
     compute();
   } catch (err) {
     console.error(err);

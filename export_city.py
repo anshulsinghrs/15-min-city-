@@ -315,6 +315,67 @@ def export_pois(gdf, out_path):
     return len(pts)
 
 
+def fetch_fast_pois(bbox):
+    """Fetch amenities directly and fast from Overpass with fallback servers."""
+    minlon, minlat, maxlon, maxlat = bbox
+    ql = f"""[out:json][timeout:90][bbox:{minlat},{minlon},{maxlat},{maxlon}];
+(
+  node["amenity"];
+  way["amenity"];
+  node["shop"];
+  way["shop"];
+  node["leisure"];
+  way["leisure"];
+  node["railway"];
+  way["railway"];
+  node["tourism"];
+  way["tourism"];
+  node["historic"];
+  way["historic"];
+  node["highway"="bus_stop"];
+);
+out center tags;"""
+    servers = [
+        "https://z.overpass-api.de/api/interpreter",
+        "https://overpass-api.de/api/interpreter",
+        "https://lz4.overpass-api.de/api/interpreter"
+    ]
+    import requests, time
+    for s in servers:
+        try:
+            print(f"Querying amenities quickly from {s}...")
+            t0 = time.time()
+            resp = requests.post(
+                s,
+                data=ql.encode('utf-8'),
+                headers={'User-Agent': '15MinCityResearch/2.0'},
+                timeout=45
+            )
+            if resp.status_code == 200:
+                res = resp.json()
+                elements = res.get("elements", [])
+                print(f"Retrieved {len(elements):,} raw elements from {s} in {time.time()-t0:.1f}s")
+                pts = []
+                for el in elements:
+                    tags = el.get("tags", {})
+                    cat_res = categorize(tags)
+                    if cat_res is None:
+                        continue
+                    lat = el.get("lat") or (el.get("center") and el["center"].get("lat"))
+                    lon = el.get("lon") or (el.get("center") and el["center"].get("lon"))
+                    if lat is None or lon is None:
+                        continue
+                    pts.append([round(lon, 5), round(lat, 5), cat_res[0], cat_res[1]])
+                return pts
+            else:
+                print(f"Server {s} returned HTTP {resp.status_code}")
+                time.sleep(2)
+        except Exception as e:
+            print(f"Warning: Failed to fetch amenities from {s}: {e}")
+            time.sleep(2)
+    return []
+
+
 def update_cities(data_dir, slug, name):
     """Add (or rename) this city in data/cities.json, which fills the page's city menu."""
     path = Path(data_dir) / "cities.json"
@@ -363,8 +424,7 @@ def main():
 
     ox.settings.use_cache = True
     ox.settings.log_console = True
-    if args.overpass:
-        ox.settings.overpass_url = args.overpass
+    ox.settings.overpass_url = args.overpass or "https://z.overpass-api.de/api"
     # osmnx drops most way tags; keep the one that marks stairs with a wheelchair ramp
     ox.settings.useful_tags_way = sorted(set(ox.settings.useful_tags_way) | {"ramp:wheelchair"})
     out = Path("data") / args.slug
@@ -398,11 +458,14 @@ def main():
           % (stats["steps"], stats["steps_with_wheelchair_ramp"]))
 
     print("Downloading amenities ...")
-    if args.radius:
-        gdf = ox.features_from_point(center, tags, dist=args.radius)
-    else:
-        gdf = ox.features_from_place(args.place, tags)
-    pts = collect_pois(gdf)
+    pts = fetch_fast_pois(stats["bbox"])
+    if not pts:
+        print("Falling back to OSMnx features download...")
+        if args.radius:
+            gdf = ox.features_from_point(center, tags, dist=args.radius)
+        else:
+            gdf = ox.features_from_place(args.place, tags)
+        pts = collect_pois(gdf)
     print("Points of interest:", len(pts))
 
     minlon, minlat, maxlon, maxlat = stats["bbox"]

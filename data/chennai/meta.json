@@ -1,0 +1,67 @@
+{
+ "name": "Chennai, Tamil Nadu, India",
+ "bbox": [
+  80.2153,
+  13.02874,
+  80.30475,
+  13.13666
+ ],
+ "start": [
+  13.0827,
+  80.2707
+ ],
+ "nodes": 21693,
+ "edges": 29523,
+ "pois": 3476,
+ "tiles": {
+  "km": 2.5,
+  "lon0": 80.2053,
+  "lat0": 13.018740000000001,
+  "dlon": 0.02305621831351188,
+  "dlat": 0.022616247512212775,
+  "list": [
+   "0_0",
+   "1_0",
+   "2_0",
+   "3_0",
+   "0_1",
+   "1_1",
+   "2_1",
+   "3_1",
+   "0_2",
+   "1_2",
+   "2_2",
+   "3_2",
+   "0_3",
+   "1_3",
+   "2_3",
+   "3_3",
+   "0_4",
+   "1_4",
+   "2_4",
+   "3_4",
+   "4_4",
+   "0_5",
+   "1_5",
+   "2_5",
+   "3_5",
+   "4_5",
+   "4_3"
+  ]
+ },
+ "cats": [
+  "Groceries & Essentials",
+  "Healthcare",
+  "Education",
+  "Parks & Recreation",
+  "Dining & Caf\u00e9s",
+  "Rest Benches",
+  "Metro Stations",
+  "Civic & Financial",
+  "Culture & Worship",
+  "Sanitation & Water",
+  "Local Bus, Tram & Ferry Stops",
+  "Suburban Railway Stations",
+  "Bus Terminals & Stations"
+ ]
+}

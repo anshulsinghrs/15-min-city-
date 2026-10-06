@@ -1,8 +1,40 @@
 {
  "cities": [
   {
+   "id": "ahmedabad",
+   "name": "Ahmedabad"
+  },
+  {
+   "id": "bengaluru",
+   "name": "Bengaluru"
+  },
+  {
+   "id": "chennai",
+   "name": "Chennai"
+  },
+  {
+   "id": "gurgaon",
+   "name": "Gurgaon"
+  },
+  {
+   "id": "hyderabad",
+   "name": "Hyderabad"
+  },
+  {
    "id": "kolkata",
    "name": "Kolkata"
+  },
+  {
+   "id": "mumbai",
+   "name": "Mumbai"
+  },
+  {
+   "id": "delhi",
+   "name": "New Delhi"
+  },
+  {
+   "id": "pune",
+   "name": "Pune"
   }
  ]
 }
