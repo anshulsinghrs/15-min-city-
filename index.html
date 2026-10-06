@@ -392,6 +392,173 @@
     pointer-events: none;
   }
 
+  
+  /* Location Search Card & Popover */
+  .search-card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.25s ease;
+    margin-bottom: 2px;
+  }
+  .search-card:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    width: 100%;
+  }
+  .search-icon-svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+  }
+  .search-card:focus-within .search-icon-svg {
+    color: var(--accent);
+  }
+  .search-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-main);
+    font-family: inherit;
+    padding: 4px 0;
+  }
+  .search-input::placeholder {
+    color: var(--text-faint);
+  }
+  .search-clear-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 13px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .search-clear-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .search-gps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--accent);
+    background: var(--accent-glow);
+    color: var(--accent);
+    padding: 5px 9px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .search-gps-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--accent-glow);
+    filter: brightness(1.1);
+  }
+  .search-gps-btn:active {
+    transform: translateY(0);
+  }
+  .search-spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--text-faint);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: searchSpin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes searchSpin {
+    to { transform: rotate(360deg); }
+  }
+  .search-results-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1200;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--card-border);
+    transition: background 0.15s ease;
+    text-align: left;
+  }
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+  .search-result-item:hover, .search-result-item.active {
+    background: var(--accent-glow);
+  }
+  .search-result-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+  }
+  .search-result-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .search-result-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .search-result-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .search-empty-state {
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
   /* Landmark Quick Jumper */
   .landmark-box {
     margin-bottom: 2px;
@@ -1616,6 +1783,28 @@
       <div class="city-select-wrap">
         <select id="city" class="city-dropdown" title="Select a city to explore"></select>
       </div>
+    </div>
+
+    
+    <!-- Location Search & Current GPS Location -->
+    <div class="search-card" id="searchCard">
+      <div class="search-input-wrapper">
+        <svg class="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="locSearchInput" class="search-input" placeholder="Search address, neighborhood or landmark..." autocomplete="off" spellcheck="false">
+        <span id="locSearchSpinner" class="search-spinner" style="display:none;"></span>
+        <button type="button" id="locClearBtn" class="search-clear-btn" title="Clear search" style="display:none;">✕</button>
+        <button type="button" id="locCurrentBtn" class="search-gps-btn" title="Use current GPS location">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="12 2 15 12 12 15 9 12 12 2"></polygon>
+          </svg>
+          <span class="gps-btn-text">My Location</span>
+        </button>
+      </div>
+      <div id="locSearchResults" class="search-results-popover" style="display: none;"></div>
     </div>
 
     <!-- Landmark Presets (Dynamic per City) -->
@@ -3028,6 +3217,319 @@ function updateTransitLabels(cityId, cityName) {
   if (bLabel) bLabel.innerHTML = `<b>${trans.bus}</b>`;
 }
 
+
+// ==================== Location Search & Current Location ====================
+const CITY_CENTERS = {
+  ahmedabad: [23.0225, 72.5714],
+  bengaluru: [12.9716, 77.5946],
+  chennai: [13.0827, 80.2707],
+  delhi: [28.6139, 77.2090],
+  gurgaon: [28.4595, 77.0266],
+  hyderabad: [17.3850, 78.4867],
+  kolkata: [22.5726, 88.3639],
+  mumbai: [19.0760, 72.8777],
+  pune: [18.5204, 73.8567]
+};
+
+function initLocationSearch() {
+  const input = $("locSearchInput");
+  const popover = $("locSearchResults");
+  const clearBtn = $("locClearBtn");
+  const gpsBtn = $("locCurrentBtn");
+  const spinner = $("locSearchSpinner");
+  const mapSearchBtn = $("mapSearchBtn");
+  const mapLocateBtn = $("locateBtn");
+
+  if (!input || !popover) return;
+
+  let debounceTimer = null;
+  let activeIndex = -1;
+  let currentResults = [];
+
+  const showLoading = (loading) => {
+    if (spinner) spinner.style.display = loading ? "inline-block" : "none";
+  };
+
+  const closePopover = () => {
+    popover.style.display = "none";
+    popover.innerHTML = "";
+    activeIndex = -1;
+    currentResults = [];
+  };
+
+  const selectResult = (item) => {
+    if (!item) return;
+    if (item.isGps) {
+      handleCurrentLocation();
+      closePopover();
+      return;
+    }
+    input.value = item.title;
+    if (clearBtn) clearBtn.style.display = "inline-flex";
+    closePopover();
+    teleportTo(item.lat, item.lon, item.title);
+  };
+
+  // Smart Geolocation Handler with Multi-City Detection
+  async function handleCurrentLocation() {
+    if (!navigator.geolocation) {
+      showToast("Geolocation is not supported by your browser", "⚠️");
+      return;
+    }
+    showToast("Locating your current GPS coordinates...", "📡");
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        
+        // 1. Check if within active city bounding box
+        if (META && META.bbox) {
+          const [minLon, minLat, maxLon, maxLat] = META.bbox;
+          const insideActive = (lat >= minLat - 0.05 && lat <= maxLat + 0.05 && lng >= minLon - 0.05 && lng <= maxLon + 0.05);
+          if (insideActive) {
+            input.value = "Current Location";
+            if (clearBtn) clearBtn.style.display = "inline-flex";
+            teleportTo(lat, lng, "Current Location");
+            showToast("Origin set to your current GPS location", "🎯");
+            return;
+          }
+        }
+
+        // 2. If outside active city, check if user is in one of the other supported cities!
+        if (typeof CITIES !== "undefined" && CITIES.length > 0) {
+          const matchedCity = CITIES.find(c => {
+            const center = CITY_CENTERS[c.id];
+            if (center) {
+              const d = Math.hypot(lat - center[0], lng - center[1]);
+              return d < 0.45; // ~50 km radius
+            }
+            return false;
+          });
+
+          if (matchedCity && matchedCity.id !== CITY) {
+            showToast(`Detected you're in ${matchedCity.name}! Switching city...`, "🎯");
+            $("city").value = matchedCity.id;
+            loadCity(matchedCity.id, false).then(() => {
+              setTimeout(() => {
+                input.value = "Current Location";
+                if (clearBtn) clearBtn.style.display = "inline-flex";
+                teleportTo(lat, lng, "Current Location");
+              }, 500);
+            });
+            return;
+          }
+        }
+
+        // Outside all supported coverage
+        const curCityName = (typeof CITIES !== "undefined" && (CITIES.find(c => c.id === CITY) || {}).name) || (META && META.name) || "study area";
+        showToast(`Your location (${lat.toFixed(3)}, ${lng.toFixed(3)}) is outside ${curCityName} coverage`, "⚠️");
+        if (typeof flashBoundary === "function") flashBoundary();
+      },
+      err => {
+        let msg = "Could not access location";
+        if (err.code === 1) msg = "Location permission denied. Please allow location access in your browser.";
+        else if (err.code === 2) msg = "Position unavailable";
+        else if (err.code === 3) msg = "Location request timed out";
+        showToast(msg, "⚠️");
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+    );
+  }
+
+  if (gpsBtn) gpsBtn.addEventListener("click", handleCurrentLocation);
+  if (mapLocateBtn) {
+    mapLocateBtn.addEventListener("click", handleCurrentLocation);
+  }
+
+  if (mapSearchBtn) {
+    mapSearchBtn.addEventListener("click", () => {
+      const panel = $("panel");
+      const openBtn = $("openPanelBtn");
+      if (panel) {
+        panel.classList.remove("collapsed");
+        if (openBtn) openBtn.style.display = "none";
+        map.invalidateSize();
+      }
+      input.focus();
+      input.select();
+    });
+  }
+
+  // Clear button
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      clearBtn.style.display = "none";
+      closePopover();
+      input.focus();
+    });
+  }
+
+  // Live Autocomplete with Nominatim + Local Landmarks
+  input.addEventListener("input", () => {
+    const q = input.value.trim();
+    if (clearBtn) clearBtn.style.display = q ? "inline-flex" : "none";
+    clearTimeout(debounceTimer);
+    if (q.length < 2) {
+      closePopover();
+      showLoading(false);
+      return;
+    }
+    showLoading(true);
+    debounceTimer = setTimeout(() => executeSearch(q), 350);
+  });
+
+  async function executeSearch(query) {
+    try {
+      const cityName = (typeof CITIES !== "undefined" && (CITIES.find(c => c.id === CITY) || {}).name) || (META && META.name) || "";
+      const results = [];
+
+      // 1. Add "Use Current GPS Location" item at the top
+      results.push({
+        isGps: true,
+        title: "Use My Current Location",
+        sub: "Set origin beacon to your current GPS position",
+        icon: "🎯"
+      });
+
+      // 2. Check local presets (instant local matches)
+      const presets = (typeof CITY_LANDMARKS !== "undefined" && CITY_LANDMARKS[CITY]) || [];
+      const qLower = query.toLowerCase();
+      presets.forEach(p => {
+        if (p.name.toLowerCase().includes(qLower)) {
+          results.push({
+            title: p.name,
+            sub: `${cityName} landmark`,
+            lat: p.lat,
+            lon: p.lon,
+            icon: p.icon || "📍"
+          });
+        }
+      });
+
+      // 3. Query OpenStreetMap Nominatim
+      let bboxStr = "";
+      if (META && META.bbox) {
+        const [minLon, minLat, maxLon, maxLat] = META.bbox;
+        bboxStr = `&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=0`;
+      }
+      const searchQ = (cityName && !query.toLowerCase().includes(cityName.toLowerCase())) ? `${query}, ${cityName}` : query;
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(searchQ)}&limit=6&addressdetails=1${bboxStr}`;
+      
+      const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+      if (res.ok) {
+        const data = await res.json();
+        data.forEach(item => {
+          const lat = parseFloat(item.lat), lon = parseFloat(item.lon);
+          let icon = "📍";
+          const cat = item.category || "", type = item.type || "";
+          if (type.includes("station") || type.includes("metro") || type.includes("subway") || cat === "railway") icon = "🚇";
+          else if (type.includes("bus") || cat === "highway") icon = "🚌";
+          else if (type.includes("school") || type.includes("university") || cat === "education") icon = "🏫";
+          else if (type.includes("hospital") || type.includes("clinic") || type.includes("pharmacy")) icon = "🏥";
+          else if (type.includes("park") || type.includes("garden")) icon = "🌳";
+          else if (type.includes("shop") || type.includes("mall") || cat === "shop") icon = "🛍️";
+          else if (type.includes("place") || type.includes("suburb") || type.includes("neighbourhood")) icon = "🏙️";
+
+          const mainTitle = item.name || item.display_name.split(",")[0];
+          const subTitle = item.display_name.replace(mainTitle + ",", "").trim();
+          results.push({
+            title: mainTitle,
+            sub: subTitle || item.display_name,
+            lat,
+            lon,
+            icon
+          });
+        });
+      }
+
+      showLoading(false);
+      renderResults(results);
+    } catch (err) {
+      console.warn("Search error:", err);
+      showLoading(false);
+      renderResults([]);
+    }
+  }
+
+  function renderResults(results) {
+    currentResults = results;
+    activeIndex = -1;
+    if (!results || results.length === 0) {
+      popover.innerHTML = '<div class="search-empty-state">No matching locations found. Try a different street or landmark.</div>';
+      popover.style.display = "block";
+      return;
+    }
+
+    popover.innerHTML = results.map((item, idx) => `
+      <div class="search-result-item" data-index="${idx}">
+        <div class="search-result-icon">${item.icon}</div>
+        <div class="search-result-content">
+          <div class="search-result-title">${escapeHtml(item.title)}</div>
+          <div class="search-result-sub">${escapeHtml(item.sub)}</div>
+        </div>
+      </div>
+    `).join("");
+
+    popover.style.display = "block";
+
+    popover.querySelectorAll(".search-result-item").forEach(el => {
+      el.addEventListener("click", () => {
+        const idx = parseInt(el.getAttribute("data-index"), 10);
+        selectResult(currentResults[idx]);
+      });
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m]);
+  }
+
+  // Keyboard navigation
+  input.addEventListener("keydown", e => {
+    if (popover.style.display === "none" || currentResults.length === 0) {
+      if (e.key === "Enter") {
+        const q = input.value.trim();
+        if (q) executeSearch(q);
+      }
+      return;
+    }
+    const items = popover.querySelectorAll(".search-result-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % items.length;
+      updateActiveItem(items);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + items.length) % items.length;
+      updateActiveItem(items);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeIndex >= 0 && activeIndex < currentResults.length) {
+        selectResult(currentResults[activeIndex]);
+      } else if (currentResults.length > 0) {
+        selectResult(currentResults[0]);
+      }
+    } else if (e.key === "Escape") {
+      closePopover();
+    }
+  });
+
+  function updateActiveItem(items) {
+    items.forEach((it, i) => it.classList.toggle("active", i === activeIndex));
+    if (activeIndex >= 0 && items[activeIndex]) {
+      items[activeIndex].scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  // Close when clicking outside
+  document.addEventListener("click", e => {
+    const card = $("searchCard");
+    if (card && !card.contains(e.target)) {
+      closePopover();
+    }
+  });
+}
+
 // Teleport landmark
 function teleportTo(lat, lng, name) {
   origin = L.latLng(lat, lng);
@@ -3444,6 +3946,13 @@ async function loadCity(id, fresh) {
     if (subEl) subEl.textContent = `${cityName} Walkability & Equity`;
     updateLandmarks(id, cityName);
     updateTransitLabels(id, cityName);
+    const locSearchIn = $("locSearchInput");
+    if (locSearchIn) {
+      locSearchIn.placeholder = `Search neighborhood, road or landmark in ${cityName}...`;
+      locSearchIn.value = "";
+      if ($("locClearBtn")) $("locClearBtn").style.display = "none";
+    }
+
     const countBadge = $("cityCountBadge");
     if (countBadge && CITIES.length > 1) countBadge.textContent = `${CITIES.length} Tier 1 Cities`;
 
@@ -3468,6 +3977,7 @@ $("city").addEventListener("change", () => {
   const id = CITIES.some(c => c.id === wanted) ? wanted : CITIES[0].id;
   $("city").value = id;
   await loadCity(id, false);
+  initLocationSearch();
 })();
 </script>
 </body>
