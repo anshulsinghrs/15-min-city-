@@ -1708,7 +1708,7 @@
 <div id="map"></div>
 
 <!-- Floating City Study Boundary HUD Pill -->
-<div class="boundary-hud-pill" id="boundaryHudPill" title="City study boundary and coverage metrics">
+<div class="boundary-hud-pill" id="boundaryHudPill" title="City study boundary and coverage metrics" style="display: none;">
   <span style="font-size:13px;">📐</span>
   <span id="boundaryHudText">Study Boundary</span>
   <button type="button" class="boundary-hud-btn" id="fitBoundaryBtn" title="Fit camera to city study boundary">Fit Bounds</button>
@@ -1891,7 +1891,7 @@
       </div>
       <div class="toggle-group">
         <label class="custom-toggle">
-          <input type="checkbox" id="showBoundary" checked>
+          <input type="checkbox" id="showBoundary">
           <span class="toggle-text">
             <span class="dot" style="background:#0ea5e9;box-shadow:0 0 6px #0ea5e9"></span>
             <span id="boundaryLayerLabel"><b>Official Municipal City Boundary</b></span>
@@ -3565,7 +3565,9 @@ function updateCityBoundaryLayer() {
   tileGridLayerGroup.clearLayers();
   boundaryGeoJsonLayer = null;
 
-  const showBoundary = $("showBoundary") ? $("showBoundary").checked : true;
+  const showBoundary = $("showBoundary") ? $("showBoundary").checked : false;
+  const hudPill = $("boundaryHudPill");
+  if (hudPill) hudPill.style.display = showBoundary ? "flex" : "none";
   const showGrid = $("showTileGrid") ? $("showTileGrid").checked : false;
 
   const cityName = (CITIES.find(c => c.id === CITY) || {}).name || (META && META.name) || CITY;
@@ -3686,25 +3688,13 @@ $("fitBoundaryBtn")?.addEventListener("click", () => {
 });
 
 map.on("click", e => {
-  if (boundaryGeoJsonLayer && boundaryGeoJsonLayer.getBounds().isValid()) {
-    const bounds = boundaryGeoJsonLayer.getBounds();
-    // Allow small 0.01 deg tolerance around official municipal boundary
-    const southWest = L.latLng(bounds.getSouth() - 0.01, bounds.getWest() - 0.01);
-    const northEast = L.latLng(bounds.getNorth() + 0.01, bounds.getEast() + 0.01);
-    const expandedBounds = L.latLngBounds(southWest, northEast);
-    if (!expandedBounds.contains(e.latlng)) {
-      const officialName = currentBoundaryData?.properties?.name || (CITIES.find(c => c.id === CITY) || {}).name || "city";
-      showToast(`📍 Outside official boundary of ${officialName}. Click inside the highlighted municipal area.`, "⚠️");
-      flashBoundary();
-      return;
-    }
-  } else if (META && META.bbox) {
+  if (window.PrismUI && window.PrismUI.handleClick(e)) return;
+  if (META && META.bbox) {
     const [minLon, minLat, maxLon, maxLat] = META.bbox;
     const { lat, lng } = e.latlng;
-    if (lat < minLat || lat > maxLat || lng < minLon || lng > maxLon) {
-      const cityName = (CITIES.find(c => c.id === CITY) || {}).name || META.name || "city";
-      showToast(`📍 Clicked outside ${cityName} study area. Please click inside the highlighted boundary.`, "⚠️");
-      flashBoundary();
+    if (lat < minLat - 0.08 || lat > maxLat + 0.08 || lng < minLon - 0.08 || lng > maxLon + 0.08) {
+      const cityName = (typeof CITIES !== "undefined" && (CITIES.find(c => c.id === CITY) || {}).name) || (META && META.name) || "study area";
+      showToast(`Clicked outside ${cityName} coverage area.`, "⚠️");
       return;
     }
   }
@@ -3714,11 +3704,6 @@ map.on("click", e => {
 });
 marker.on("drag", () => {
   origin = marker.getLatLng();
-  if (boundaryGeoJsonLayer && boundaryGeoJsonLayer.getBounds().isValid()) {
-    if (!boundaryGeoJsonLayer.getBounds().contains(origin)) {
-      flashBoundary();
-    }
-  }
   schedule();
 });
 map.on("moveend resize zoomend", draw);
